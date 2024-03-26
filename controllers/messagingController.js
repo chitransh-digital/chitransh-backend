@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { getMessaging } = require("firebase-admin/messaging");
 const NotificationLogs = require("../models/NotificationLog");
+const { allowAdmin } = require("../middlewares/authMiddleware");
 
-router.post("/send", async function (req, res) {
+router.post("/send", allowAdmin, async function (req, res) {
   const itemId = req.body.itemId;
   if (itemId) {
     const checkLastNotification = await checkLastUpdate(itemId);
@@ -41,7 +42,7 @@ router.post("/send", async function (req, res) {
     });
 });
 
-router.post("/send-image", async function (req, res) {
+router.post("/send-image", allowAdmin, async function (req, res) {
   const itemId = req.body.itemId;
   const checkLastNotification = await checkLastUpdate(itemId);
   if (!checkLastNotification.shouldSend) {

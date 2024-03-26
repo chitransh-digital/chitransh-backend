@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const Jobs = require("../models/Job");
+const { allowAdmin } = require("../middlewares/authMiddleware");
 
-router.post("/add", async (req, res) => {
+router.post("/add", allowAdmin, async (req, res) => {
   try {
     const job = new Jobs(req.body);
     const savedJob = await job.save();
@@ -15,7 +16,7 @@ router.post("/add", async (req, res) => {
   }
 });
 
-router.get("/getAll", async (req, res) => {
+router.get("/getAll", allowAdmin, async (req, res) => {
   try {
     const jobs = await Jobs.find();
     res.status(200).json({ status: true, jobs });
@@ -24,7 +25,7 @@ router.get("/getAll", async (req, res) => {
   }
 });
 
-router.patch("/update/:id", async (req, res) => {
+router.patch("/update/:id", allowAdmin, async (req, res) => {
   try {
     const job = await Jobs.findByIdAndUpdate(req.params.id, req.body);
     if (!job) {
@@ -36,7 +37,7 @@ router.patch("/update/:id", async (req, res) => {
   }
 });
 
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", allowAdmin, async (req, res) => {
   try {
     const job = await Jobs.findByIdAndDelete(req.params.id);
     if (!job) {
