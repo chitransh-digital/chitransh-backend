@@ -5,6 +5,8 @@ const {
 } = require("./config/firebase-messaging-config");
 const NotificationController = require("./controllers/messagingController");
 const JobController = require("./controllers/jobController");
+const BusinessController = require("./controllers/businessController");
+const MemberController = require("./controllers/memberController");
 const { json } = require("body-parser");
 const { default: mongoose } = require("mongoose");
 require("dotenv").config();
@@ -27,6 +29,8 @@ app.use(function (req, res, next) {
 
 app.use("/notification/", NotificationController);
 app.use("/job/", JobController);
+app.use("/business/", BusinessController);
+app.use("/member/", MemberController);
 
 app.all("*", async (req, res) => {
   throw new Error("Route Not Found : " + req.originalUrl);
