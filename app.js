@@ -4,9 +4,9 @@ const {
   initializeFirebaseAdmin,
 } = require("./config/firebase-messaging-config");
 const NotificationController = require("./controllers/messagingController");
+const JobController = require("./controllers/jobController");
 const { json } = require("body-parser");
 const { default: mongoose } = require("mongoose");
-const { default: Jobs } = require("./models/Job");
 require("dotenv").config();
 
 const app = express();
@@ -26,6 +26,7 @@ app.use(function (req, res, next) {
 });
 
 app.use("/notification/", NotificationController);
+app.use("/job/", JobController);
 
 app.all("*", async (req, res) => {
   throw new Error("Route Not Found : " + req.originalUrl);
