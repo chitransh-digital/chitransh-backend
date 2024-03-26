@@ -1,8 +1,13 @@
 const express = require("express");
 const cors = require("cors");
-const { initializeFirebaseAdmin } = require("./config/firebase-messaging-config");
+const {
+  initializeFirebaseAdmin,
+} = require("./config/firebase-messaging-config");
+const NotificationController = require("./controllers/messagingController");
+const { json } = require("body-parser");
+const { default: mongoose } = require("mongoose");
+const { default: Jobs } = require("./models/Job");
 require("dotenv").config();
-const mongoose = require("mongoose");
 
 const app = express();
 app.use(express.json());
@@ -12,28 +17,30 @@ const corsOption = {
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
 };
-
-mongoose.set("strictQuery", false);
-mongoose.connect('mongodb+srv://pranavbh003:yI60kDGgwmKH9LD9@cluster0.axbnepk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0' 
-)
-mongoose.Promise = global.Promise;
-
 app.use(cors(corsOption));
-
-initializeFirebaseAdmin();
+app.use(json());
 
 app.use(function (req, res, next) {
   res.setHeader("Content-Type", "application/json");
   next();
 });
 
-
+app.use("/notification/", NotificationController);
 
 app.all("*", async (req, res) => {
   throw new Error("Route Not Found : " + req.originalUrl);
 });
 
-const port = process.env.PORT || 5000;
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+const start = async () => {
+  initializeFirebaseAdmin();
+
+  const mongoURI = process.env.MONGO_URI || "mongodb://localhost/chitransh";
+  await mongoose.connect(mongoURI);
+  
+  const port = process.env.PORT || 5000;
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+};
+
+start();

@@ -23,7 +23,7 @@ router.post("/send", function (req, res) {
     });
 });
 
-app.post("/send-image", function (req, res) {
+router.post("/send-image", function (req, res) {
   const message = {
     notification: {
       title: req.body.title,
