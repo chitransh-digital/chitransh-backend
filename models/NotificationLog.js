@@ -21,8 +21,10 @@ const notificationLogSchema = new mongoose.Schema(
     },
   }
 );
+
 const NotificationLogs = mongoose.model(
   "NotificationLogs",
   notificationLogSchema
 );
+
 module.exports = NotificationLogs;
