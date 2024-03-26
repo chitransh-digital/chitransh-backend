@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { initializeFirebaseAdmin } = require("./config/firebase-messaging-config");
 require("dotenv").config();
+const mongoose = require("mongoose");
 
 const app = express();
 app.use(express.json());
@@ -11,6 +12,12 @@ const corsOption = {
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
 };
+
+mongoose.set("strictQuery", false);
+mongoose.connect('mongodb+srv://pranavbh003:yI60kDGgwmKH9LD9@cluster0.axbnepk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0' 
+)
+mongoose.Promise = global.Promise;
+
 app.use(cors(corsOption));
 
 initializeFirebaseAdmin();
