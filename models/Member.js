@@ -25,7 +25,6 @@ const memberSchema = new mongoose.Schema(
     familyID: {
       type: String,
       required: true,
-      unique: true,
     },
     contact: {
       type: String,
