@@ -18,9 +18,9 @@ router.post("/loginAdmin", async (req, res) => {
     const { password } = req.body;
     const adminConfig = await AdminConfig.findOne();
     bcrypt.compare(password, adminConfig.password, function (err, result) {
-        const token = createToken(adminConfig.id);
+      const token = createToken(adminConfig.id);
       if (result) {
-        res.cookie("jwt", token, { maxAge : maxAge * 1000 })
+        res.cookie("jwt", token, { maxAge: maxAge * 1000 });
         res.status(200).json({ token });
       } else {
         res.status(401).json({ message: "Invalid password" });
@@ -37,15 +37,25 @@ router.get("/isLoggedIn", allowAdmin, async (req, res) => {
 
 router.put("/changeAdminPassword", allowAdmin, async (req, res) => {
   try {
-    const { password } = req.body;
-    bcrypt.hash(password, 10, async function (err, hash) {
-      const adminConfig = await AdminConfig.findOne();
-      adminConfig.password = hash;
-      await adminConfig.save();
-      res
-        .status(200)
-        .json({ status: true, message: "Password changed successfully" });
-    });
+    const { currentPassword, newPassword } = req.body;
+    const adminConfig = await AdminConfig.findOne();
+    bcrypt.compare(
+      currentPassword,
+      adminConfig.password,
+      function (err, result) {
+        if (!result) {
+          res.status(401).json({ message: "Incorrect Password" });
+          return;
+        }
+        bcrypt.hash(newPassword, 10, async function (err, hash) {
+          adminConfig.password = hash;
+          await adminConfig.save();
+          res
+            .status(200)
+            .json({ status: true, message: "Password changed successfully" });
+        });
+      }
+    );
   } catch (err) {
     res.status(400).json({ status: false, message: err.message });
   }
