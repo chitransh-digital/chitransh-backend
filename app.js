@@ -6,6 +6,7 @@ const {
 const NotificationController = require("./controllers/messagingController");
 const JobController = require("./controllers/jobController");
 const AuthController = require("./controllers/authController");
+const MemberController = require("./controllers/memberController");
 const { json } = require("body-parser");
 const { default: mongoose } = require("mongoose");
 const cookieParser = require("cookie-parser");
@@ -30,9 +31,10 @@ app.use(function (req, res, next) {
 app.use("/notification/", NotificationController);
 app.use("/job/", JobController);
 app.use("/auth/", AuthController);
+app.use("/member/", MemberController);
 
 app.all("*", async (req, res) => {
-  throw new Error("Route Not Found : " + req.originalUrl);
+  res.json({ message: "Invalid route" });
 });
 
 const start = async () => {
