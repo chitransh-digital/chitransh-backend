@@ -6,13 +6,16 @@ const {
 const NotificationController = require("./controllers/messagingController");
 const JobController = require("./controllers/jobController");
 const BusinessController = require("./controllers/businessController");
+const AuthController = require("./controllers/authController");
 const MemberController = require("./controllers/memberController");
 const { json } = require("body-parser");
 const { default: mongoose } = require("mongoose");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
-app.use(express.json());
+app.use(json());
+app.use(cookieParser());
 
 const corsOption = {
   origin: ["http://localhost:3000", "https://main--chitranshadmin.netlify.app"],
@@ -20,7 +23,6 @@ const corsOption = {
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 };
 app.use(cors(corsOption));
-app.use(json());
 
 app.use(function (req, res, next) {
   res.setHeader("Content-Type", "application/json");
@@ -30,10 +32,11 @@ app.use(function (req, res, next) {
 app.use("/notification/", NotificationController);
 app.use("/job/", JobController);
 app.use("/business/", BusinessController);
+app.use("/auth/", AuthController);
 app.use("/member/", MemberController);
 
 app.all("*", async (req, res) => {
-  throw new Error("Route Not Found : " + req.originalUrl);
+  res.json({ message: "Invalid route" });
 });
 
 const start = async () => {
