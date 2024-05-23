@@ -1,5 +1,4 @@
-
-module.exports = router;const express = require("express");
+const express = require("express");
 const router = express.Router();
 const Jobs = require("../models/Job");
 const { allowAdmin } = require("../middlewares/authMiddleware");
@@ -19,7 +18,7 @@ router.post("/add", allowAdmin, async (req, res) => {
 
 router.get("/getAll", allowAdmin, async (req, res) => {
   try {
-    const jobs = await Jobs.find();
+    const jobs = await Jobs.findOne();
     res.status(200).json({ status: true, jobs });
   } catch (err) {
     res.status(400).json({ status: false, message: err.message });
