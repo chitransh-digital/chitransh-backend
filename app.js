@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const {
   initializeFirebaseAdmin,
 } = require("./config/firebase-messaging-config");
@@ -9,6 +10,8 @@ const BusinessController = require("./controllers/businessController");
 const AuthController = require("./controllers/authController");
 const MemberController = require("./controllers/memberController");
 const NewsController = require("./controllers/newsController");
+const KaryakarniController = require("./controllers/karyakarniController");
+const uploadController = require("./controllers/imageController");
 const { json } = require("body-parser");
 const { default: mongoose } = require("mongoose");
 const cookieParser = require("cookie-parser");
@@ -17,6 +20,7 @@ require("dotenv").config();
 const app = express();
 app.use(json());
 app.use(cookieParser());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const corsOption = {
   origin: ["http://localhost:3000", "https://main--chitranshadmin.netlify.app","*"],
@@ -36,6 +40,8 @@ app.use("/business/", BusinessController);
 app.use("/auth/", AuthController);
 app.use("/member/", MemberController);
 app.use("/feeds/",NewsController);
+app.use("/karyakarni",KaryakarniController);
+app.use("/image",uploadController);
 
 app.all("*", async (req, res) => {
   res.json({ message: "Invalid route" });

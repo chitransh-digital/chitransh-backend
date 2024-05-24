@@ -22,7 +22,7 @@ const karyakarniSchema = new mongoose.Schema({
         required: true
     },
     designations: [{
-        type: String,
+        type: [String],
         required: true
     }],
     members: [{
