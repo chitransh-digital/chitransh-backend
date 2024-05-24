@@ -70,22 +70,4 @@ router.patch("/updateBusiness/:id", async (req, res) => {
   }
 });
 
-// router.get("/getBusinessByCityAndState", async (req, res) => {
-//   try {
-//     const city = req.query.city;
-//     const state = req.query.state;
-
-//     const businesses = await Business.find({ city, state });
-
-//     res.json({
-//       businesses: businesses,
-//       count: businesses.length,
-//       status: true,
-//       message: "Businesses fetched successfully!",
-//     });
-//   } catch (error) {
-//     res.status(400).json({ status: false, message: error.message });
-//   }
-// });
-
 module.exports = router;
