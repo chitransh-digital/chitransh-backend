@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Business = require("../models/business");
+const Business = require("../models/Business");
 
 
 router.post("/registerBusiness",async(req,res)=>{
@@ -59,5 +59,3 @@ router.get("/getBusinesses",async(req,res)=>{
 });
 
 module.exports = router;
-
-
