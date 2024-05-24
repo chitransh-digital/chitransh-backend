@@ -58,6 +58,36 @@ router.get("/getBusinesses",async(req,res)=>{
       }
 });
 
+router.patch("/updateBusiness/:id", async (req, res) => {
+  try {
+    const business = await Business.findByIdAndUpdate(req.params.id, req.body);
+    if (!business) {
+      throw new Error("Couldn't update business");
+    }
+    res.status(200).json({ status: true, message: "Business updated successfully" });
+  } catch (err) {
+    res.status(400).json({ status: false, message: err.message });
+  }
+});
+
+// router.get("/getBusinessByCityAndState", async (req, res) => {
+//   try {
+//     const city = req.query.city;
+//     const state = req.query.state;
+
+//     const businesses = await Business.find({ city, state });
+
+//     res.json({
+//       businesses: businesses,
+//       count: businesses.length,
+//       status: true,
+//       message: "Businesses fetched successfully!",
+//     });
+//   } catch (error) {
+//     res.status(400).json({ status: false, message: error.message });
+//   }
+// });
+
 module.exports = router;
 
 
