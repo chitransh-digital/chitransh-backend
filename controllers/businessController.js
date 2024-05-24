@@ -58,16 +58,4 @@ router.get("/getBusinesses",async(req,res)=>{
       }
 });
 
-router.patch("/updateBusiness/:id", async (req, res) => {
-  try {
-    const business = await Business.findByIdAndUpdate(req.params.id, req.body);
-    if (!business) {
-      throw new Error("Couldn't update business");
-    }
-    res.status(200).json({ status: true, message: "Business updated successfully" });
-  } catch (err) {
-    res.status(400).json({ status: false, message: err.message });
-  }
-});
-
 module.exports = router;
