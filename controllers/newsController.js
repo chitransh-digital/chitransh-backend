@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Feeds = require("../models/News");
 const fs = require("fs");
+const path = require("path");
 
 router.post("/uploadFeeds",async(req,res)=>{
     try {
@@ -73,7 +74,7 @@ router.patch("/update/:id", async (req, res) => {
         throw new Error("Couldn't find feed");
       }
       try {
-        const {imageURL} = feed.images[0];
+        const imageURL = feed.images[0];
         const filePath = path.join(__dirname, imageURL);
         if(feed.images.length > 0){
           fs.unlink(filePath, (err) => {

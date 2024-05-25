@@ -7,7 +7,7 @@ const karyakarniSchema = new mongoose.Schema({
     },
     logo: {
         type: String,
-        required: ""
+        default: ""
     },
     landmark: {
         type: String,
@@ -22,7 +22,7 @@ const karyakarniSchema = new mongoose.Schema({
         required: true
     },
     designations: [{
-        type: [String],
+        type: String,
         required: true
     }],
     members: [{

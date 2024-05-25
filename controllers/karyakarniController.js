@@ -2,12 +2,14 @@ const express = require("express");
 const router = express.Router();
 const Karyakarni = require("../models/Karyakarni");
 const { allowAdmin } = require("../middlewares/authMiddleware");
+const fs = require("fs");
+const path = require("path");
 
-router.post("/registerKaryakarni", allowAdmin, async (req, res) => {
+router.post("/registerKaryakarni", async (req, res) => {
     try {
         const karyakarni = new Karyakarni(req.body);
-        const karyakarniJob = await karyakarni.save();
-        if (!karyakarniJob) {
+        const newKaryakarni = await karyakarni.save();
+        if (!newKaryakarni) {
         throw new Error("Couldn't add karyakarni");
         }
         res.status(200).json({ status: true, message: "Karyakarni added successfully" });
@@ -18,23 +20,23 @@ router.post("/registerKaryakarni", allowAdmin, async (req, res) => {
 
 router.get("/getKaryakarnis", async (req, res) => {
     try {
-        const {city, state, name} = req.query;
+        const { city, state, name } = req.query;
         let query = {};
-
+  
         if (city) {
             query.city = city;
         }
-
+  
         if (state) {
             query.state = state;
         }
-
+  
         if (name) {
             query.name = name;
         }
 
         const excludeFields = ["limit", "sort", "page"];
-        excludeFields.foreach(el => delete req.query[el]);
+        excludeFields.forEach(el => delete req.query[el]);
 
         // Sorting
         const sortBy = req.query.sort
@@ -42,7 +44,7 @@ router.get("/getKaryakarnis", async (req, res) => {
         : "name";
 
         // Pagination settings
-        const page = parseInt(rew.query.page, 10) || 1;
+        const page = parseInt(req.query.page, 10) || 1;
         const limit = parseInt(req.query.limit, 10) || 10;
         const skip = (page - 1) * limit;
 
@@ -51,7 +53,7 @@ router.get("/getKaryakarnis", async (req, res) => {
             return res.status(400).json({ message: "page does not exist!"})
         }
 
-        let karyakarnis = await Karyakarni.find(JSON.parse(filterStr))
+        let karyakarnis = await Karyakarni.find(query)
         .sort(sortBy)
         .skip(skip)
         .limit(limit);
@@ -70,5 +72,49 @@ router.get("/getKaryakarnis", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 }) ;
+
+router.patch("/update/:id", async (req, res) => {
+    try {
+      const karyakarni = await Karyakarni.findByIdAndUpdate(req.params.id, req.body);
+      if (!karyakarni) {
+        throw new Error("Couldn't update karyakarni");
+      }
+      res.status(200).json({ status: true, message: "Karyakarni updated successfully" });
+    } catch (err) {
+      res.status(400).json({ status: false, message: err.message });
+    }
+  });
+
+  router.delete("/delete/:id", async (req, res) => {
+    try {
+      const karyakarni = await Karyakarni.findById(req.params.id);
+      if (!karyakarni) {
+        throw new Error("Couldn't find karyakarni");
+      }
+      try {
+        const karyakarniLogo = karyakarni.logo;
+        const filePath = path.join(__dirname, karyakarniLogo);
+        if(karyakarniLogo !== "" && fs.existsSync(filePath)){
+          fs.unlink(filePath, (err) => {
+            if (err) {
+              if (err.code === 'ENOENT') {
+                return res.status(404).json({ message: 'File not found' });
+              }
+              return res.status(500).json({ message: 'Failed to delete file' });
+            }
+        
+            console.log('File deleted successfully');
+          });
+        }
+      } catch (error) {
+        console.error("Error deleting logo:", error.message)
+      }
+      await Karyakarni.findByIdAndDelete(req.params.id);
+      res.status(200).json({ status: true, message: "Karyakarni deleted successfully" });
+    } catch (err) {
+      res.status(400).json({ status: false, message: err.message });
+    }
+  });
+
 
 module.exports = router;
