@@ -69,4 +69,16 @@ router.patch("/updateBusiness/:id", async (req, res) => {
     res.status(400).json({ status: false, message: err.message });
   }
 });
-module.exports = router;
+
+router.delete("/deleteBusiness/:ownerID/:name", async (req, res) => {
+  try {
+    const { ownerID, name } = req.params;
+    const business = await Business.findOneAndDelete({ ownerID, name });
+    if (!business) {
+      throw new Error("Couldn't delete business");
+    }
+    res.status(200).json({ status: true, message: "Business deleted successfully" });
+  } catch (err) {
+    res.status(400).json({ status: false, message: err.message });
+  }
+});
