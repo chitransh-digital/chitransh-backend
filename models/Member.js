@@ -40,10 +40,6 @@ const memberSchema = new mongoose.Schema({
             required: true,
             match: [/^\d{10}$/, "Please fill a valid contact number"]
         },
-        DOB: {
-            type: Date,
-            required: true
-        },
         profilePic: {
             type: String,
             default: ''
@@ -60,12 +56,45 @@ const memberSchema = new mongoose.Schema({
             type: String,
             required: true
         },
+        occupationDetails: [
+            {
+                jobPost: {
+                    type: String,
+                    required: false
+                },
+                jobDepartment: {
+                    type: String,
+                    required: false
+                },
+                jobEmployer: {
+                    type: String,
+                    required: false
+                },
+                jobLocation: {
+                    type: String,
+                    required: false
+                },
+                businessName: {
+                    type: String,
+                    required: false
+                },
+                businessType: {
+                    type: String,
+                    required: false
+                },
+                businessAddress: {
+                    type: String,
+                    required: false
+                },
+            }
+        ],
         education: {
             type: String,
             required: true
         }
     }]
-}, {
+},
+{
     toJSON: {
         transform(doc, ret) {
             ret.id = ret._id;
@@ -73,7 +102,9 @@ const memberSchema = new mongoose.Schema({
             delete ret.__v;
         }
     }
-});
+}
+
+);
 
 const Member = mongoose.model("Member", memberSchema);
 
