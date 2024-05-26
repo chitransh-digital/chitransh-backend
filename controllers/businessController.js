@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Business = require("../models/Business");
 
-
 router.post("/registerBusiness",async(req,res)=>{
     try {
         const business = new Business(req.body);
@@ -82,3 +81,5 @@ router.delete("/deleteBusiness/:ownerID/:name", async (req, res) => {
     res.status(400).json({ status: false, message: err.message });
   }
 });
+
+module.exports = router;

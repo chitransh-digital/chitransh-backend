@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const upload = require('../middlewares/multerMiddleware');
 const fs = require('fs');
+const path = require('path');
 
 router.post('/upload', (req, res) => {
     upload(req, res, (err) => {
@@ -22,8 +23,8 @@ router.post('/upload', (req, res) => {
 
 router.delete('/delete/:filename',(req,res) => {
   try {
-    const {filename} = req.params.filename;
-    const filePath = path.join(__dirname,'uploads', filename);
+    const filename = req.params.filename;
+    const filePath = path.join(__dirname, '../uploads/', filename);
     fs.unlink(filePath, (err) => {
       if (err) {
         if (err.code === 'ENOENT') {
