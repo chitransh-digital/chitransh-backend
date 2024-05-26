@@ -7,22 +7,26 @@ router.post("/addMember", async (req, res) => {
     const { familyID, memberData } = req.body;
 
     let family = await Member.findOne({ familyID });
-
-    if (!family) {
-      family = new Member({ familyID, members: [memberData] });
-    } else {
+    if (family && memberData.relation !== "head") {
       family.members.push(memberData);
     }
-
+    else if (family && memberData.relation === "head") {
+      return res.status(400).json({ message: "Family already exists." });
+    }
+    else {
+    family = new Member({
+      familyID,
+      members: [memberData]
+    });
+    }
     await family.save();
 
-    res.status(201).json(family);
+    res.status(201).json({ family, message: "Family member created successfully!" });
   } catch (error) {
-    console.error("Error adding member:", error.message);
+    console.error("Error adding family:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 router.get("/viewFamilies", async (req, res) => {
     try {
@@ -81,6 +85,52 @@ router.get("/viewFamilies", async (req, res) => {
         console.error("Error viewing families:", error.message);
         res.status(500).json({ error: "Internal server error" });
     }
+});
+
+router.patch("/update/:familyID", async (req, res) => {
+  try {
+    const { name, memberData } = req.body;
+
+    const family = await Member.findOneAndUpdate(
+      { familyID: req.params.familyID, "members.name": name },
+      {
+        $set: {
+          "members.$": memberData
+        }
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!family) {
+      throw new Error("Couldn't update family member");
+    }
+
+    res.status(200).json({ status: true, message: "Member updated successfully" });
+  } catch (err) {
+    res.status(400).json({ status: false, message: err.message });
+  }
+});
+
+router.delete("/delete/:familyID/:name", async (req, res) => {
+  try {
+    const { familyID, name } = req.params;
+
+    const family = await Member.findOneAndUpdate(
+      { familyID: familyID },
+      {
+        $pull: { members: { name: name } }
+      },
+      { new: true }
+    );
+
+    if (!family) {
+      throw new Error("Couldn't delete family member");
+    }
+
+    res.status(200).json({ status: true, message: "Member deleted successfully" });
+  } catch (err) {
+    res.status(400).json({ status: false, message: err.message });
+  }
 });
 
 module.exports = router;

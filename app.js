@@ -50,7 +50,7 @@ app.all("*", async (req, res) => {
 const start = async () => {
   initializeFirebaseAdmin();
 
-  const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/";
+  const mongoURI = process.env.MONGO_URI;
   await mongoose.connect(mongoURI);
   
   const port = process.env.PORT || 5000;

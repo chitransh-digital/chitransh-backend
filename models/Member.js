@@ -28,6 +28,7 @@ const memberSchema = new mongoose.Schema({
         },
         gender: {
             type: String,
+            enum: ["Male", "Female", "Others"],
             required: true
         },
         karyakarni: {
@@ -36,10 +37,11 @@ const memberSchema = new mongoose.Schema({
         },
         contact: {
             type: String,
-            default: ''
+            required: true,
+            match: [/^\d{10}$/, "Please fill a valid contact number"]
         },
         DOB: {
-            type: String,
+            type: Date,
             required: true
         },
         profilePic: {
@@ -63,8 +65,7 @@ const memberSchema = new mongoose.Schema({
             required: true
         }
     }]
-},
-{
+}, {
     toJSON: {
         transform(doc, ret) {
             ret.id = ret._id;
@@ -72,9 +73,7 @@ const memberSchema = new mongoose.Schema({
             delete ret.__v;
         }
     }
-}
-
-);
+});
 
 const Member = mongoose.model("Member", memberSchema);
 
