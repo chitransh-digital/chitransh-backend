@@ -143,6 +143,28 @@ router.patch("/update/:id", async (req, res) => {
       } catch (error) {
         console.error("Error deleting logo:", error.message);
       }
+      try {
+        if (karyakarni.members && karyakarni.members.length > 0) {
+          karyakarni.members.forEach(member => {
+            if (member.profilePic) {
+              const filePath = path.join(__dirname, '..', member.profilePic);
+              if (fs.existsSync(filePath)) {
+                fs.unlink(filePath, (err) => {
+                  if (err) {
+                    if (err.code === 'ENOENT') {
+                      return res.status(404).json({ message: 'File not found' });
+                    }
+                    return res.status(500).json({ message: 'Failed to delete file' });
+                  }
+                  console.log('File deleted successfully');
+                });
+              }
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error deleting profile pictures:", error.message);
+      }
       await Karyakarni.findByIdAndDelete(req.params.id);
       res.status(200).json({ status: true, message: "Karyakarni deleted successfully" });
     } catch (err) {
