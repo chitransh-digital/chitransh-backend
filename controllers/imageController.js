@@ -21,23 +21,22 @@ router.post('/upload', (req, res) => {
     });
   });
 
-router.delete('/delete/:filename',(req,res) => {
-  try {
-    const filename = req.params.filename;
-    const filePath = path.join(__dirname, '../uploads/', filename);
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        if (err.code === 'ENOENT') {
-          return res.status(404).json({ message: 'File not found' });
-        }
-        return res.status(500).json({ message: 'Failed to delete file' });
-      }
+// const deleteFile = async (filename) => {
+//   try {
+//     const filePath = path.join(__dirname, '..', filename);
+//     fs.unlink(filePath, (err) => {
+//       if (err) {
+//         if (err.code === 'ENOENT') {
+//           return res.status(404).json({ message: 'File not found' });
+//         }
+//         return res.status(500).json({ message: 'Failed to delete file' });
+//       }
   
-      res.status(200).json({ message: 'File deleted successfully' });
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-})
+//       res.status(200).json({ message: 'File deleted successfully' });
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// }
 
 module.exports = router;

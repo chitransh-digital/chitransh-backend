@@ -42,7 +42,14 @@ router.get("/getFeeds",async(req,res)=>{
           .skip(skip)
           .limit(limit);
     
-        const FeedsList = filterQuery;
+        // const FeedsList = filterQuery;
+        const baseUrl = req.protocol + '://' + req.get('host');
+        const FeedsList = filterQuery.map(feed => {
+          if (feed.images && feed.images.length > 0) {
+            feed.images = feed.images.map(image => `${baseUrl}${image}`);
+          }
+          return feed;
+        });
     
         res.json({
           Feeds: FeedsList,
@@ -56,15 +63,34 @@ router.get("/getFeeds",async(req,res)=>{
 });
 
 router.patch("/update/:id", async (req, res) => {
-    try {
-      const feed = await Feeds.findByIdAndUpdate(req.params.id, req.body);
-      if (!feed) {
-        throw new Error("Couldn't update feed");
-      }
-      res.status(200).json({ status: true, message: "Feed updated successfully" });
-    } catch (err) {
-      res.status(400).json({ status: false, message: err.message });
+  try {
+    const feed = await Feeds.findById(req.params.id);
+    if (!feed) {
+      throw new Error("Couldn't find feed");
     }
+    if (req.body.images) {
+      if (feed.images && feed.images.length > 0) {
+        const oldImagePath = path.join(__dirname, '..', feed.images[0]);
+        fs.unlink(oldImagePath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error('Failed to delete old image:', err.message);
+          }
+        });
+      }
+    }
+    
+    const updatedFeed = await Feeds.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedFeed) {
+      throw new Error("Couldn't update feed");
+    }
+    
+    const baseUrl = req.protocol + '://' + req.get('host');
+    updatedFeed.images = updatedFeed.images.map(image => `${baseUrl}${image}`);
+
+    res.status(200).json({ status: true, message: "Feed updated successfully", feed: updatedFeed });
+  } catch (err) {
+    res.status(400).json({ status: false, message: err.message });
+  }
   });
 
   router.delete("/delete/:id", async (req, res) => {
@@ -75,7 +101,8 @@ router.patch("/update/:id", async (req, res) => {
       }
       try {
         const imageURL = feed.images[0];
-        const filePath = path.join(__dirname, imageURL);
+        const filePath = path.join(__dirname,'..', imageURL);
+        console.log("Deleting image:",filePath)
         if(feed.images.length > 0){
           fs.unlink(filePath, (err) => {
             if (err) {

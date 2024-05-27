@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Business = require("../models/Business");
+const fs = require("fs");
+const path = require("path");
 
 router.post("/registerBusiness",async(req,res)=>{
     try {
@@ -44,11 +46,21 @@ router.get("/getBusinesses",async(req,res)=>{
           .skip(skip)
           .limit(limit);
     
-        const businessList = filterQuery;
+        // const businessList = filterQuery;
+        const baseUrl = req.protocol + '://' + req.get('host');
+        const BusinessList = filterQuery.map(business => {
+          if (business.images && business.images.length > 0) {
+            business.images = business.images.map(image => `${baseUrl}${image}`);
+          }
+          if(business.attachments && business.attachments.length > 0){
+            business.attachments = business.attachments.map(attachment => `${baseUrl}${attachment}`);
+          }
+          return business;
+        });
     
         res.json({
-          businesses: businessList,
-          count: businessList.length,
+          businesses: BusinessList,
+          count: BusinessList.length,
           status: true,
           message: "Businesses fetched successfully!",
         });
@@ -59,11 +71,39 @@ router.get("/getBusinesses",async(req,res)=>{
 
 router.patch("/updateBusiness/:id", async (req, res) => {
   try {
-    const business = await Business.findByIdAndUpdate(req.params.id, req.body);
+    const business = await Business.findById(req.params.id);
     if (!business) {
       throw new Error("Couldn't update business");
     }
-    res.status(200).json({ status: true, message: "Business updated successfully" });
+    console.log(req.body)
+    if(req.body.images || req.body.attachments){
+      if(business.images && business.images.length > 0){
+        const oldImagePath = path.join(__dirname, '..', business.images[0]);
+        fs.unlink(oldImagePath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error('Failed to delete old image:', err.message);
+          }
+        });
+      }
+      if(business.attachments && business.attachments.length > 0){
+        const oldAttachmentPath = path.join(__dirname, '..', business.attachments[0]);
+        fs.unlink(oldAttachmentPath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error('Failed to delete old attachment:', err.message);
+          }
+        });
+      }
+    }
+
+    const updatedBusiness = await Business.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if(!updatedBusiness){
+      throw new Error("Couldn't update business");
+    }
+
+    const baseUrl = req.protocol + '://' + req.get('host');
+    updatedBusiness.images = updatedBusiness.images.map(image => `${baseUrl}${image}`);
+
+    res.status(200).json({ status: true, message: "Business updated successfully", business: updatedBusiness });
   } catch (err) {
     res.status(400).json({ status: false, message: err.message });
   }
@@ -72,10 +112,31 @@ router.patch("/updateBusiness/:id", async (req, res) => {
 router.delete("/deleteBusiness/:ownerID/:name", async (req, res) => {
   try {
     const { ownerID, name } = req.params;
-    const business = await Business.findOneAndDelete({ ownerID, name });
+    const business = await Business.findOne({ ownerID, name });
     if (!business) {
       throw new Error("Couldn't delete business");
     }
+    try{
+      if(business.images && business.images.length > 0){
+        const oldImagePath = path.join(__dirname, '..', business.images[0]);
+        fs.unlink(oldImagePath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error('Failed to delete image:', err.message);
+          }
+        });
+      }
+      if(business.attachments && business.attachments.length > 0){
+        const oldAttachmentPath = path.join(__dirname, '..', business.attachments[0]);
+        fs.unlink(oldAttachmentPath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error('Failed to delete attachment:', err.message);
+          }
+        });
+      }
+    }catch(err){
+      throw new Error(err);
+    }
+    await Business.findOneAndDelete({ ownerID, name });
     res.status(200).json({ status: true, message: "Business deleted successfully" });
   } catch (err) {
     res.status(400).json({ status: false, message: err.message });
