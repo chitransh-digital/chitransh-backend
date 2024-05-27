@@ -37,19 +37,19 @@ const businessSchema = new mongoose.Schema(
     },
     link: {
       type: String,
-      required: true,
+      default: "",
     },
     images: {
         type: [String],
-        required: true,
+        default: [],
     },
     attachments: {
         type: [String],
-        required: true,
+        default: [],
     },
     coupon: {
       type: String,
-      required: true,
+      required: false,
     },
   },
   {

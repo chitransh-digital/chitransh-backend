@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Member = require("../models/Member");
+const fs = require("fs");
+const path = require("path");
 
 router.post("/addMember", async (req, res) => {
   try {
@@ -75,6 +77,15 @@ router.get("/viewFamilies", async (req, res) => {
             return head && head.city.toLowerCase() === city.toLowerCase() && head.state.toLowerCase() === state.toLowerCase();
         }) : families;
 
+        const baseUrl = req.protocol + '://' + req.get('host');
+        filteredFamilies.forEach(family => {
+            family.members.forEach(member => {
+                if (member.profilePic) {
+                    member.profilePic = `${baseUrl}${member.profilePic}`;
+                }
+            });
+        });
+
         res.status(200).json({
             families: filteredFamilies,
             count: filteredFamilies.length,
@@ -91,43 +102,97 @@ router.patch("/update/:familyID", async (req, res) => {
   try {
     const { name, memberData } = req.body;
 
-    const family = await Member.findOneAndUpdate(
-      { familyID: req.params.familyID, "members.name": name },
-      {
-        $set: {
-          "members.$": memberData
-        }
-      },
-      { new: true, runValidators: true }
-    );
-
+    const family = await Member.findOne({ familyID: req.params.familyID });
     if (!family) {
-      throw new Error("Couldn't update family member");
+      throw new Error("Family not found");
     }
 
-    res.status(200).json({ status: true, message: "Member updated successfully" });
+    const memberToUpdate = family.members.find(member => member.name === name);
+    if (!memberToUpdate) {
+      throw new Error("Member not found in the family");
+    }
+
+    const oldProfilePic = memberToUpdate.profilePic;
+
+    family.members = family.members.map(member => {
+      if (member.name === name) {
+        return { ...member, ...memberData };
+      }
+      return member;
+    });
+    await family.save();
+
+    if (oldProfilePic && memberData.profilePic !== oldProfilePic) {
+      const oldImagePath = path.join(__dirname, '..', oldProfilePic);
+      fs.unlink(oldImagePath, (err) => {
+        if (err && err.code !== 'ENOENT') {
+          console.error('Failed to delete old image:', err.message);
+        }
+      });
+    }
+
+    const baseUrl = req.protocol + '://' + req.get('host');
+    family.members = family.members.map(member => {
+      if (member.profilePic) {
+        member.profilePic = `${baseUrl}${member.profilePic}`;
+      }
+      return member;
+    });
+
+    res.status(200).json({ status: true, message: "Member updated successfully", family});
   } catch (err) {
     res.status(400).json({ status: false, message: err.message });
   }
 });
 
-router.delete("/delete/:familyID/:name", async (req, res) => {
+router.delete("/delete/:familyID/:name?", async (req, res) => {
   try {
     const { familyID, name } = req.params;
 
-    const family = await Member.findOneAndUpdate(
-      { familyID: familyID },
-      {
-        $pull: { members: { name: name } }
-      },
-      { new: true }
-    );
+    if (familyID && name) {
+      const family = await Member.findOne({ familyID });
+      if (!family) {
+        throw new Error("Family not found");
+      }
 
-    if (!family) {
-      throw new Error("Couldn't delete family member");
+      const memberIndex = family.members.findIndex(member => member.name === name);
+      if (memberIndex === -1) {
+        throw new Error("Member not found in the family");
+      }
+
+      const deletedMember = family.members.splice(memberIndex, 1)[0];
+      await family.save();
+
+      if (deletedMember.profilePic) {
+        const oldImagePath = path.join(__dirname, '..', deletedMember.profilePic);
+        fs.unlink(oldImagePath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error('Failed to delete old image:', err.message);
+          }
+        });
+      }
+
+      res.status(200).json({ status: true, message: "Member deleted successfully", deletedMember });
+    } else if (familyID && !name) {
+      const deletedFamily = await Member.findOneAndDelete({ familyID });
+      if (!deletedFamily) {
+        throw new Error("Family not found");
+      }
+      deletedFamily.members.forEach(member => {
+        if (member.profilePic) {
+          const oldImagePath = path.join(__dirname, '..', member.profilePic);
+          fs.unlink(oldImagePath, (err) => {
+            if (err && err.code !== 'ENOENT') {
+              console.error('Failed to delete old image:', err.message);
+            }
+          });
+        }
+      });
+
+      res.status(200).json({ status: true, message: "Family deleted successfully", deletedFamily });
+    } else {
+      throw new Error("Invalid request parameters");
     }
-
-    res.status(200).json({ status: true, message: "Member deleted successfully" });
   } catch (err) {
     res.status(400).json({ status: false, message: err.message });
   }

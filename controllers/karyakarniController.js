@@ -58,7 +58,22 @@ router.get("/getKaryakarnis", async (req, res) => {
         .skip(skip)
         .limit(limit);
 
-        const karyakarniList = karyakarnis;
+        // const karyakarniList = karyakarnis;
+        const baseUrl = req.protocol + '://' + req.get('host');
+        const karyakarniList = karyakarnis.map(karyakarni => {
+          if (karyakarni.logo) {
+            karyakarni.logo = `${baseUrl}${karyakarni.logo}`;
+          }
+          if (karyakarni.members && karyakarni.members.length > 0) {
+            karyakarni.members = karyakarni.members.map(member => {
+              if (member.profilePic) {
+                member.profilePic = `${baseUrl}${member.profilePic}`;
+              }
+              return member;
+            });
+          }
+          return karyakarni;
+        });
 
         res.status(200).json({
             karyakarni: karyakarniList,
@@ -74,16 +89,35 @@ router.get("/getKaryakarnis", async (req, res) => {
 }) ;
 
 router.patch("/update/:id", async (req, res) => {
-    try {
-      const karyakarni = await Karyakarni.findByIdAndUpdate(req.params.id, req.body);
-      if (!karyakarni) {
-        throw new Error("Couldn't update karyakarni");
-      }
-      res.status(200).json({ status: true, message: "Karyakarni updated successfully" });
-    } catch (err) {
-      res.status(400).json({ status: false, message: err.message });
+  try {
+    const karyakarni = await Karyakarni.findById(req.params.id);
+    if (!karyakarni) {
+      throw new Error("Couldn't find karyakarni");
     }
-  });
+
+    if (req.body.logo) {
+      if (karyakarni.logo) {
+        const oldLogoPath = path.join(__dirname, '..', karyakarni.logo);
+        fs.unlink(oldLogoPath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error('Failed to delete old logo:', err.message);
+          }
+        });
+      }
+    }
+
+    const updatedKaryakarni = await Karyakarni.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedKaryakarni) {
+      throw new Error("Couldn't update karyakarni");
+    }
+    const baseUrl = req.protocol + '://' + req.get('host');
+    updatedKaryakarni.logo = `${baseUrl}${updatedKaryakarni.logo}`;
+    res.status(200).json({ status: true, message: "Karyakarni updated successfully", karyakarni: updatedKaryakarni });
+  } catch (err) {
+    res.status(400).json({ status: false, message: err.message });
+  }
+});
+
 
   router.delete("/delete/:id", async (req, res) => {
     try {
@@ -92,22 +126,22 @@ router.patch("/update/:id", async (req, res) => {
         throw new Error("Couldn't find karyakarni");
       }
       try {
-        const karyakarniLogo = karyakarni.logo;
-        const filePath = path.join(__dirname, karyakarniLogo);
-        if(karyakarniLogo !== "" && fs.existsSync(filePath)){
-          fs.unlink(filePath, (err) => {
-            if (err) {
-              if (err.code === 'ENOENT') {
-                return res.status(404).json({ message: 'File not found' });
+        if (karyakarni.logo) {
+          const filePath = path.join(__dirname, '..', karyakarni.logo);
+          if (fs.existsSync(filePath)) {
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                if (err.code === 'ENOENT') {
+                  return res.status(404).json({ message: 'File not found' });
+                }
+                return res.status(500).json({ message: 'Failed to delete file' });
               }
-              return res.status(500).json({ message: 'Failed to delete file' });
-            }
-        
-            console.log('File deleted successfully');
-          });
+              console.log('File deleted successfully');
+            });
+          }
         }
       } catch (error) {
-        console.error("Error deleting logo:", error.message)
+        console.error("Error deleting logo:", error.message);
       }
       await Karyakarni.findByIdAndDelete(req.params.id);
       res.status(200).json({ status: true, message: "Karyakarni deleted successfully" });
