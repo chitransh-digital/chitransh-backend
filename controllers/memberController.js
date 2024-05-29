@@ -3,8 +3,9 @@ const router = express.Router();
 const Member = require("../models/Member");
 const fs = require("fs");
 const path = require("path");
+const { allowAdmin } = require("../middlewares/authMiddleware");
 
-router.post("/addMember", async (req, res) => {
+router.post("/addMember",allowAdmin, async (req, res) => {
   try {
     const { familyID, memberData } = req.body;
 
@@ -98,7 +99,7 @@ router.get("/viewFamilies", async (req, res) => {
     }
 });
 
-router.patch("/update/:familyID", async (req, res) => {
+router.patch("/update/:familyID",allowAdmin, async (req, res) => {
   try {
     const { name, memberData } = req.body;
 
@@ -145,7 +146,7 @@ router.patch("/update/:familyID", async (req, res) => {
   }
 });
 
-router.delete("/delete/:familyID/:name?", async (req, res) => {
+router.delete("/delete/:familyID/:name?",allowAdmin, async (req, res) => {
   try {
     const { familyID, name } = req.params;
 

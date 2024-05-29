@@ -5,7 +5,7 @@ const { allowAdmin } = require("../middlewares/authMiddleware");
 const fs = require("fs");
 const path = require("path");
 
-router.post("/registerKaryakarni", async (req, res) => {
+router.post("/registerKaryakarni",allowAdmin, async (req, res) => {
     try {
         const karyakarni = new Karyakarni(req.body);
         const newKaryakarni = await karyakarni.save();
@@ -88,7 +88,7 @@ router.get("/getKaryakarnis", async (req, res) => {
     }
 }) ;
 
-router.patch("/update/:id", async (req, res) => {
+router.patch("/update/:id", allowAdmin, async (req, res) => {
   try {
     const karyakarni = await Karyakarni.findById(req.params.id);
     if (!karyakarni) {
@@ -119,7 +119,7 @@ router.patch("/update/:id", async (req, res) => {
 });
 
 
-  router.delete("/delete/:id", async (req, res) => {
+  router.delete("/delete/:id",allowAdmin, async (req, res) => {
     try {
       const karyakarni = await Karyakarni.findById(req.params.id);
       if (!karyakarni) {
