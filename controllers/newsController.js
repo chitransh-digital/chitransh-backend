@@ -3,8 +3,9 @@ const router = express.Router();
 const Feeds = require("../models/News");
 const fs = require("fs");
 const path = require("path");
+const { allowAdmin } = require("../middlewares/authMiddleware");
 
-router.post("/uploadFeeds",async(req,res)=>{
+router.post("/uploadFeeds",allowAdmin,async(req,res)=>{
     try {
         const Feed = new Feeds(req.body);
         const newFeeds = await Feed.save();
@@ -62,7 +63,7 @@ router.get("/getFeeds",async(req,res)=>{
       }
 });
 
-router.patch("/update/:id", async (req, res) => {
+router.patch("/update/:id",allowAdmin, async (req, res) => {
   try {
     const feed = await Feeds.findById(req.params.id);
     if (!feed) {
@@ -93,7 +94,7 @@ router.patch("/update/:id", async (req, res) => {
   }
   });
 
-  router.delete("/delete/:id", async (req, res) => {
+  router.delete("/delete/:id",allowAdmin, async (req, res) => {
     try {
       const feed = await Feeds.findById(req.params.id);
       if (!feed) {

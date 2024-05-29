@@ -3,7 +3,7 @@ const router = express.Router();
 const Jobs = require("../models/Job");
 const { allowAdmin } = require("../middlewares/authMiddleware");
 
-router.post("/add", async (req, res) => {
+router.post("/add",allowAdmin, async (req, res) => {
   try {
     const job = new Jobs(req.body);
     const savedJob = await job.save();
@@ -46,7 +46,7 @@ router.get("/getAll", async (req, res) => {
   }
 });
 
-router.patch("/update/:id", async (req, res) => {
+router.patch("/update/:id",allowAdmin, async (req, res) => {
   try {
     const job = await Jobs.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!job) {
@@ -58,7 +58,7 @@ router.patch("/update/:id", async (req, res) => {
   }
 });
 
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/delete/:id",allowAdmin, async (req, res) => {
   try {
     const job = await Jobs.findByIdAndDelete(req.params.id);
     if (!job) {
