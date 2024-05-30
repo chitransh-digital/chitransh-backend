@@ -34,14 +34,14 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.use("/notification/", NotificationController);
-app.use("/job/", JobController);
-app.use("/business/", BusinessController);
-app.use("/auth/", AuthController);
-app.use("/member/", MemberController);
-app.use("/feeds/",NewsController);
-app.use("/karyakarni",KaryakarniController);
-app.use("/image",uploadController);
+app.use("/api/notification/", NotificationController);
+app.use("/api/job/", JobController);
+app.use("/api/business/", BusinessController);
+app.use("/api/auth/", AuthController);
+app.use("/api/member/", MemberController);
+app.use("/api/feeds/",NewsController);
+app.use("/api/karyakarni",KaryakarniController);
+app.use("/api/image",uploadController);
 
 app.all("*", async (req, res) => {
   res.json({ message: "Invalid route" });
