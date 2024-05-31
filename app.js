@@ -23,7 +23,7 @@ app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const corsOption = {
-  origin: ["http://localhost:3000", "https://main--chitranshadmin.netlify.app"],
+  origin: ["http://localhost:3000", "https://main--chitranshadmin.netlify.app", "http://159.89.165.67"],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 };
