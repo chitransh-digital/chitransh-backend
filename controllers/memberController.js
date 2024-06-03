@@ -115,6 +115,11 @@ router.patch("/update/:familyID",allowAdmin, async (req, res) => {
 
     const oldProfilePic = memberToUpdate.profilePic;
 
+    if (memberData.profilePic) {
+      const baseUrl = req.protocol + '://' + req.get('host');
+      memberData.profilePic = memberData.profilePic.replace(baseUrl, '');
+    }
+
     family.members = family.members.map(member => {
       if (member.name === name) {
         return { ...member, ...memberData };

@@ -96,7 +96,20 @@ router.patch("/update/:id", allowAdmin, async (req, res) => {
     }
 
     if (req.body.logo) {
-      if (karyakarni.logo) {
+      const baseUrl = req.protocol + '://' + req.get('host');
+      req.body.logo = req.body.logo.replace(baseUrl, '');
+  }
+    if(req.body.members && req.body.members.length > 0){
+      req.body.members.forEach(member => {
+        if (member.profilePic) {
+          const baseUrl = req.protocol + '://' + req.get('host');
+          member.profilePic = member.profilePic.replace(baseUrl, '');
+        }
+      });
+    }
+
+    if (req.body.logo) {
+      if (karyakarni.logo && karyakarni.logo !== req.body.logo) {
         const oldLogoPath = path.join(__dirname, '..', karyakarni.logo);
         fs.unlink(oldLogoPath, (err) => {
           if (err && err.code !== 'ENOENT') {
