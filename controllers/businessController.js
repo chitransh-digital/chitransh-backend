@@ -77,6 +77,14 @@ router.patch("/updateBusiness/:id",allowAdmin, async (req, res) => {
       throw new Error("Couldn't update business");
     }
     console.log(req.body)
+    if (req.body.images) {
+      const baseUrl = req.protocol + '://' + req.get('host');
+      req.body.images[0] = req.body.images[0].replace(baseUrl, '');
+    }
+    if (req.body.attachments) {
+      const baseUrl = req.protocol + '://' + req.get('host');
+      req.body.attachments[0] = req.body.attachments[0].replace(baseUrl, '');
+    }
     if(req.body.images || req.body.attachments){
       if(business.images && business.images.length > 0){
         const oldImagePath = path.join(__dirname, '..', business.images[0]);

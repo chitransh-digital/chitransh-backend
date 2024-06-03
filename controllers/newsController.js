@@ -70,6 +70,10 @@ router.patch("/update/:id",allowAdmin, async (req, res) => {
       throw new Error("Couldn't find feed");
     }
     if (req.body.images) {
+      const baseUrl = req.protocol + '://' + req.get('host');
+      req.body.images[0] = req.body.images[0].replace(baseUrl, '');
+    }
+    if (req.body.images) {
       if (feed.images && feed.images.length > 0) {
         const oldImagePath = path.join(__dirname, '..', feed.images[0]);
         fs.unlink(oldImagePath, (err) => {

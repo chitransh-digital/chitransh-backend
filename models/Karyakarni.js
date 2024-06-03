@@ -15,16 +15,21 @@ const karyakarniSchema = new mongoose.Schema({
     },
     city: {
         type: String,
-        required: true
+        default: "",
     },
     state: {
         type: String,
-        required: true
+        default: "",
     },
     designations: [{
         type: String,
         required: true
     }],
+    level: { 
+        type: String, 
+        enum: ["India", "State", "City"], 
+        required: true 
+    },
     members: [{
         name: {
             type: String,
