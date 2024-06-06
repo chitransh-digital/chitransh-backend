@@ -21,6 +21,10 @@ const karyakarniSchema = new mongoose.Schema({
         type: String,
         default: "",
     },
+    address: {
+        type: String,
+        required: true
+    },
     designations: [{
         type: String,
         required: true
@@ -37,7 +41,7 @@ const karyakarniSchema = new mongoose.Schema({
         },
         familyID: {
             type: String,
-            required: true
+            default: ''
         },
         profilePic: {
             type: String,
@@ -51,18 +55,6 @@ const karyakarniSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-        landmark: {
-            type: String,
-            required: true
-        },
-        city: {
-            type: String,
-            required: true
-        },
-        state: {
-            type: String,
-            required: true
-        }
     }]
 },
 {
