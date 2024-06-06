@@ -37,8 +37,12 @@ const memberSchema = new mongoose.Schema({
         },
         contact: {
             type: String,
-            required: true,
+            required: false,
             match: [/^\d{10}$/, "Please fill a valid contact number"]
+        },
+        contactVisibility: {
+            type: Boolean,
+            default: true
         },
         profilePic: {
             type: String,
