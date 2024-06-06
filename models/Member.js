@@ -95,7 +95,27 @@ const memberSchema = new mongoose.Schema({
         education: {
             type: String,
             required: true
-        }
+        },
+        educationDetails: [
+            {
+                course: {
+                    type: String,
+                    required: false
+                },
+                fieldOfStudy: {
+                    type: String,
+                    required: false
+                },
+                institute: {
+                    type: String,
+                    required: false
+                },
+                additionalDetails: {
+                    type: String,
+                    required: false
+                }
+            }
+        ]
     }]
 },
 {
