@@ -19,7 +19,7 @@ router.post("/registerKaryakarni",allowAdmin, captFirstLetter,async (req, res) =
     }
 });
 
-router.get("/getKaryakarnis", captFirstLetter,async (req, res) => {
+router.get("/getKaryakarnis", async (req, res) => {
     try {
         const { city, state, name } = req.query;
         let query = {};

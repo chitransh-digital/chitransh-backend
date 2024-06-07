@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const Jobs = require("../models/Job");
 const { allowAdmin } = require("../middlewares/authMiddleware");
+const { captFirstLetter } = require("../middlewares/capitalizationMiddleware");
 
-router.post("/add",allowAdmin, async (req, res) => {
+router.post("/add",allowAdmin,captFirstLetter, async (req, res) => {
   try {
     const job = new Jobs(req.body);
     const savedJob = await job.save();
@@ -46,7 +47,7 @@ router.get("/getAll", async (req, res) => {
   }
 });
 
-router.patch("/update/:id",allowAdmin, async (req, res) => {
+router.patch("/update/:id",allowAdmin,captFirstLetter, async (req, res) => {
   try {
     const job = await Jobs.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!job) {
