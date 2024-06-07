@@ -34,7 +34,7 @@ router.post("/addMember/:id?",allowAdmin, captFirstLetter,async (req, res) => {
   }
 });
 
-router.get("/viewFamilies", captFirstLetter,async (req, res) => {
+router.get("/viewFamilies", async (req, res) => {
     try {
         const { city, state, familyID } = req.query;
         let query = {};

@@ -1,12 +1,21 @@
-
 const captFirstLetter = (req, res, next) => {
-    if (req.body) {
-        for (const key in req.body) {
-            if (typeof req.body[key] === 'string') {
-                req.body[key] = req.body[key].charAt(0).toUpperCase() + req.body[key].slice(1);
-            }
+    const capitalize = (value) => {
+        if (typeof value === 'string') {
+            return value.charAt(0).toUpperCase() + value.slice(1);
+        } else if (Array.isArray(value)) {
+            return value.map(capitalize);
+        } else if (value && typeof value === 'object') {
+            Object.keys(value).forEach(key => {
+                value[key] = capitalize(value[key]);
+            });
         }
+        return value;
+    };
+
+    if (req.body) {
+        req.body = capitalize(req.body);
     }
+
     next();
 };
 

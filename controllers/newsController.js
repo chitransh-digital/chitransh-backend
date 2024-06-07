@@ -6,7 +6,7 @@ const path = require("path");
 const { allowAdmin } = require("../middlewares/authMiddleware");
 const { captFirstLetter } = require("../middlewares/capitalizationMiddleware");
 
-router.post("/uploadFeeds",allowAdmin,async(req,res)=>{
+router.post("/uploadFeeds",allowAdmin,captFirstLetter,async(req,res)=>{
     try {
         const Feed = new Feeds(req.body);
         const newFeeds = await Feed.save();
@@ -19,7 +19,7 @@ router.post("/uploadFeeds",allowAdmin,async(req,res)=>{
       }
 });
 
-router.get("/getFeeds",captFirstLetter,async(req,res)=>{
+router.get("/getFeeds",async(req,res)=>{
     try {
         const filter = { ...req.query };
         const excludeFields = ["limit", "sort", "page"];

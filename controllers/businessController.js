@@ -19,7 +19,7 @@ router.post("/registerBusiness",allowAdmin, captFirstLetter, async(req,res)=>{
       }
 });
 
-router.get("/getBusinesses",captFirstLetter, async(req,res)=>{
+router.get("/getBusinesses", async(req,res)=>{
     try {
         //Filtering
         const filter = { ...req.query };
