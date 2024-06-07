@@ -118,10 +118,9 @@ router.patch("/updateBusiness/:id",allowAdmin, async (req, res) => {
   }
 });
 
-router.delete("/deleteBusiness/:ownerID/:name",allowAdmin, async (req, res) => {
+router.delete("/deleteBusiness/:id",allowAdmin, async (req, res) => {
   try {
-    const { ownerID, name } = req.params;
-    const business = await Business.findOne({ ownerID, name });
+    const business = await Business.findById(req.params.id);
     if (!business) {
       throw new Error("Couldn't delete business");
     }
@@ -145,7 +144,7 @@ router.delete("/deleteBusiness/:ownerID/:name",allowAdmin, async (req, res) => {
     }catch(err){
       throw new Error(err);
     }
-    await Business.findOneAndDelete({ ownerID, name });
+    await Business.findByIdAndDelete(req.params.id);
     res.status(200).json({ status: true, message: "Business deleted successfully" });
   } catch (err) {
     res.status(400).json({ status: false, message: err.message });
