@@ -3,8 +3,9 @@ const router = express.Router();
 const { getMessaging } = require("firebase-admin/messaging");
 const NotificationLogs = require("../models/NotificationLog");
 const { allowAdmin } = require("../middlewares/authMiddleware");
+const { captFirstLetter } = require("../middlewares/capitalizationMiddleware");
 
-router.post("/send", allowAdmin, async function (req, res) {
+router.post("/send", allowAdmin, captFirstLetter,async function (req, res) {
   const itemId = req.body.itemId;
   if (itemId) {
     const checkLastNotification = await checkLastUpdate(itemId);

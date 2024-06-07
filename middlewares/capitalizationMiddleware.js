@@ -10,4 +10,4 @@ const captFirstLetter = (req, res, next) => {
     next();
 };
 
-module.exports = { captFirstLetter};
+module.exports = { captFirstLetter };

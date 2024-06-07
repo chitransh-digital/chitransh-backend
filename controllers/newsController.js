@@ -4,6 +4,7 @@ const Feeds = require("../models/News");
 const fs = require("fs");
 const path = require("path");
 const { allowAdmin } = require("../middlewares/authMiddleware");
+const { captFirstLetter } = require("../middlewares/capitalizationMiddleware");
 
 router.post("/uploadFeeds",allowAdmin,async(req,res)=>{
     try {
@@ -18,7 +19,7 @@ router.post("/uploadFeeds",allowAdmin,async(req,res)=>{
       }
 });
 
-router.get("/getFeeds",async(req,res)=>{
+router.get("/getFeeds",captFirstLetter,async(req,res)=>{
     try {
         const filter = { ...req.query };
         const excludeFields = ["limit", "sort", "page"];
@@ -63,7 +64,7 @@ router.get("/getFeeds",async(req,res)=>{
       }
 });
 
-router.patch("/update/:id",allowAdmin, async (req, res) => {
+router.patch("/update/:id",allowAdmin, captFirstLetter,async (req, res) => {
   try {
     const feed = await Feeds.findById(req.params.id);
     if (!feed) {
