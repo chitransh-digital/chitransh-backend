@@ -4,8 +4,9 @@ const Karyakarni = require("../models/Karyakarni");
 const { allowAdmin } = require("../middlewares/authMiddleware");
 const fs = require("fs");
 const path = require("path");
+const { captFirstLetter } = require("../middlewares/capitalizationMiddleware");
 
-router.post("/registerKaryakarni",allowAdmin, async (req, res) => {
+router.post("/registerKaryakarni",allowAdmin, captFirstLetter,async (req, res) => {
     try {
         const karyakarni = new Karyakarni(req.body);
         const newKaryakarni = await karyakarni.save();
@@ -18,7 +19,7 @@ router.post("/registerKaryakarni",allowAdmin, async (req, res) => {
     }
 });
 
-router.get("/getKaryakarnis", async (req, res) => {
+router.get("/getKaryakarnis", captFirstLetter,async (req, res) => {
     try {
         const { city, state, name } = req.query;
         let query = {};
@@ -88,7 +89,7 @@ router.get("/getKaryakarnis", async (req, res) => {
     }
 }) ;
 
-router.patch("/update/:id", allowAdmin, async (req, res) => {
+router.patch("/update/:id", allowAdmin, captFirstLetter,async (req, res) => {
   try {
     const karyakarni = await Karyakarni.findById(req.params.id);
     if (!karyakarni) {

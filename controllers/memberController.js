@@ -4,8 +4,9 @@ const Member = require("../models/Member");
 const fs = require("fs");
 const path = require("path");
 const { allowAdmin } = require("../middlewares/authMiddleware");
+const { captFirstLetter } = require("../middlewares/capitalizationMiddleware");
 
-router.post("/addMember/:id?",allowAdmin, async (req, res) => {
+router.post("/addMember/:id?",allowAdmin, captFirstLetter,async (req, res) => {
   try {
     const { familyID, memberData } = req.body;
 
@@ -33,7 +34,7 @@ router.post("/addMember/:id?",allowAdmin, async (req, res) => {
   }
 });
 
-router.get("/viewFamilies", async (req, res) => {
+router.get("/viewFamilies", captFirstLetter,async (req, res) => {
     try {
         const { city, state, familyID } = req.query;
         let query = {};
@@ -101,7 +102,7 @@ router.get("/viewFamilies", async (req, res) => {
     }
 });
 
-router.patch("/update/:id/:memberId",allowAdmin, async (req, res) => {
+router.patch("/update/:id/:memberId",allowAdmin, captFirstLetter,async (req, res) => {
   try {
     const { memberData } = req.body;
 
