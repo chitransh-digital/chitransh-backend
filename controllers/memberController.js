@@ -5,24 +5,26 @@ const fs = require("fs");
 const path = require("path");
 const { allowAdmin } = require("../middlewares/authMiddleware");
 
-router.post("/addMember",allowAdmin, async (req, res) => {
+router.post("/addMember/:id?",allowAdmin, async (req, res) => {
   try {
     const { familyID, memberData } = req.body;
 
-    let family = await Member.findOne({ familyID });
-    if (family && memberData.relation !== "head") {
+    let family;
+    if(req.params.id){
+      family = await Member.findById(req.params.id);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found." });
+      }
       family.members.push(memberData);
+      await family.save();
     }
-    else if (family && memberData.relation === "head") {
-      return res.status(400).json({ message: "Family already exists." });
+    else{
+       family = new Member({
+        familyID,
+        members: [memberData]
+      });
+      await family.save();
     }
-    else {
-    family = new Member({
-      familyID,
-      members: [memberData]
-    });
-    }
-    await family.save();
 
     res.status(201).json({ family, message: "Family member created successfully!" });
   } catch (error) {
@@ -99,16 +101,16 @@ router.get("/viewFamilies", async (req, res) => {
     }
 });
 
-router.patch("/update/:familyID",allowAdmin, async (req, res) => {
+router.patch("/update/:id/:memberId",allowAdmin, async (req, res) => {
   try {
-    const { name, memberData } = req.body;
+    const { memberData } = req.body;
 
-    const family = await Member.findOne({ familyID: req.params.familyID });
+    const family = await Member.findById(req.params.id);
     if (!family) {
       throw new Error("Family not found");
     }
 
-    const memberToUpdate = family.members.find(member => member.name === name);
+    const memberToUpdate = family.members.find(member => member._id.toString() == req.params.memberId);
     if (!memberToUpdate) {
       throw new Error("Member not found in the family");
     }
@@ -121,8 +123,8 @@ router.patch("/update/:familyID",allowAdmin, async (req, res) => {
     }
 
     family.members = family.members.map(member => {
-      if (member.name === name) {
-        return { ...member, ...memberData };
+      if (member._id.toString() === req.params.memberId) {
+        return { ...member.toObject(), ...memberData };
       }
       return member;
     });
@@ -151,17 +153,17 @@ router.patch("/update/:familyID",allowAdmin, async (req, res) => {
   }
 });
 
-router.delete("/delete/:familyID/:name?",allowAdmin, async (req, res) => {
+router.delete("/delete/:id/:memberId?",allowAdmin, async (req, res) => {
   try {
-    const { familyID, name } = req.params;
+    const { id, memberId } = req.params;
 
-    if (familyID && name) {
-      const family = await Member.findOne({ familyID });
+    if (id && memberId) {
+      const family = await Member.findById(id);
       if (!family) {
         throw new Error("Family not found");
       }
 
-      const memberIndex = family.members.findIndex(member => member.name === name);
+      const memberIndex = family.members.findIndex(member => member._id.toString() == memberId);
       if (memberIndex === -1) {
         throw new Error("Member not found in the family");
       }
@@ -179,8 +181,8 @@ router.delete("/delete/:familyID/:name?",allowAdmin, async (req, res) => {
       }
 
       res.status(200).json({ status: true, message: "Member deleted successfully", deletedMember });
-    } else if (familyID && !name) {
-      const deletedFamily = await Member.findOneAndDelete({ familyID });
+    } else if (id && !memberId) {
+      const deletedFamily = await Member.findByIdAndDelete(id);
       if (!deletedFamily) {
         throw new Error("Family not found");
       }
