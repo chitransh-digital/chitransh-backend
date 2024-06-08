@@ -33,7 +33,8 @@ const memberSchema = new mongoose.Schema({
         },
         karyakarni: {
             type: String,
-            required: true
+            required: false,
+            default: ''
         },
         contact: {
             type: String,
