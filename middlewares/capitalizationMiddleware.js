@@ -1,4 +1,6 @@
 const captFirstLetter = (req, res, next) => {
+    const skipFields = ['images', 'logo', 'profilePic','attachments'];
+
     const capitalize = (value) => {
         if (typeof value === 'string') {
             return value.charAt(0).toUpperCase() + value.slice(1);
@@ -6,7 +8,9 @@ const captFirstLetter = (req, res, next) => {
             return value.map(capitalize);
         } else if (value && typeof value === 'object') {
             Object.keys(value).forEach(key => {
-                value[key] = capitalize(value[key]);
+                if (!skipFields.includes(key)) {
+                    value[key] = capitalize(value[key]);
+                }
             });
         }
         return value;
