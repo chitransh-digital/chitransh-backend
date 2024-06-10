@@ -3,10 +3,10 @@ const router = express.Router();
 const Business = require("../models/Business");
 const fs = require("fs");
 const path = require("path");
-const { allowAdmin } = require("../middlewares/authMiddleware");
+const { allowAuth } = require("../middlewares/authMiddleware");
 const { captFirstLetter } = require("../middlewares/capitalizationMiddleware");
 
-router.post("/registerBusiness",allowAdmin, captFirstLetter, async(req,res)=>{
+router.post("/registerBusiness", allowAuth, captFirstLetter, async(req,res)=>{
     try {
         const business = new Business(req.body);
         const businessJob = await business.save();
@@ -19,7 +19,7 @@ router.post("/registerBusiness",allowAdmin, captFirstLetter, async(req,res)=>{
       }
 });
 
-router.get("/getBusinesses", async(req,res)=>{
+router.get("/getBusinesses", allowAuth, async(req,res)=>{
     try {
         //Filtering
         const filter = { ...req.query };
@@ -71,7 +71,7 @@ router.get("/getBusinesses", async(req,res)=>{
       }
 });
 
-router.patch("/updateBusiness/:id",allowAdmin, captFirstLetter,async (req, res) => {
+router.patch("/updateBusiness/:id",allowAuth, captFirstLetter,async (req, res) => {
   try {
     const business = await Business.findById(req.params.id);
     if (!business) {
@@ -119,7 +119,7 @@ router.patch("/updateBusiness/:id",allowAdmin, captFirstLetter,async (req, res) 
   }
 });
 
-router.delete("/deleteBusiness/:id",allowAdmin, async (req, res) => {
+router.delete("/deleteBusiness/:id",allowAuth, async (req, res) => {
   try {
     const business = await Business.findById(req.params.id);
     if (!business) {

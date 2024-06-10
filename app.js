@@ -12,6 +12,7 @@ const MemberController = require("./controllers/memberController");
 const NewsController = require("./controllers/newsController");
 const KaryakarniController = require("./controllers/karyakarniController");
 const uploadController = require("./controllers/imageController");
+const userController = require("./controllers/userController");
 const { json } = require("body-parser");
 const { default: mongoose } = require("mongoose");
 const cookieParser = require("cookie-parser");
@@ -19,6 +20,7 @@ require("dotenv").config();
 
 const app = express();
 app.use(json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -42,6 +44,7 @@ app.use("/api/member/", MemberController);
 app.use("/api/feeds/",NewsController);
 app.use("/api/karyakarni",KaryakarniController);
 app.use("/api/image",uploadController);
+app.use("/api/user",userController);
 
 app.all("*", async (req, res) => {
   res.json({ message: "Invalid route" });

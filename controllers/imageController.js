@@ -3,8 +3,9 @@ const router = express.Router();
 const upload = require('../middlewares/multerMiddleware');
 const fs = require('fs');
 const path = require('path');
+const { allowAuth } = require('../middlewares/authMiddleware');
 
-router.post('/upload', (req, res) => {
+router.post('/upload',allowAuth, (req, res) => {
     upload(req, res, (err) => {
       if (err) {
         return res.status(400).json({ message: err });
@@ -20,23 +21,5 @@ router.post('/upload', (req, res) => {
       });
     });
   });
-
-// const deleteFile = async (filename) => {
-//   try {
-//     const filePath = path.join(__dirname, '..', filename);
-//     fs.unlink(filePath, (err) => {
-//       if (err) {
-//         if (err.code === 'ENOENT') {
-//           return res.status(404).json({ message: 'File not found' });
-//         }
-//         return res.status(500).json({ message: 'Failed to delete file' });
-//       }
-  
-//       res.status(200).json({ message: 'File deleted successfully' });
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// }
 
 module.exports = router;
