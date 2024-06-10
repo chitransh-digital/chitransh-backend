@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Jobs = require("../models/Job");
-const { allowAdmin } = require("../middlewares/authMiddleware");
+const { allowAdmin, allowAuth } = require("../middlewares/authMiddleware");
 const { captFirstLetter } = require("../middlewares/capitalizationMiddleware");
 
 router.post("/add",allowAdmin,captFirstLetter, async (req, res) => {
@@ -17,7 +17,7 @@ router.post("/add",allowAdmin,captFirstLetter, async (req, res) => {
   }
 });
 
-router.get("/getAll", async (req, res) => {
+router.get("/getAll",allowAuth, async (req, res) => {
   try {
         const filter = { ...req.query };
         const excludeFields = ["limit", "sort", "page"];

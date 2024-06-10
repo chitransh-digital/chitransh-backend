@@ -3,10 +3,10 @@ const router = express.Router();
 const Member = require("../models/Member");
 const fs = require("fs");
 const path = require("path");
-const { allowAdmin } = require("../middlewares/authMiddleware");
+const { allowAuth } = require("../middlewares/authMiddleware");
 const { captFirstLetter } = require("../middlewares/capitalizationMiddleware");
 
-router.post("/addMember/:id?",allowAdmin, captFirstLetter,async (req, res) => {
+router.post("/addMember/:id?", allowAuth, captFirstLetter,async (req, res) => {
   try {
     const { familyID, memberData } = req.body;
 
@@ -34,7 +34,7 @@ router.post("/addMember/:id?",allowAdmin, captFirstLetter,async (req, res) => {
   }
 });
 
-router.get("/viewFamilies", async (req, res) => {
+router.get("/viewFamilies", allowAuth, async (req, res) => {
     try {
         const { city, state, familyID } = req.query;
         let query = {};
@@ -83,6 +83,7 @@ router.get("/viewFamilies", async (req, res) => {
 
         const baseUrl = req.protocol + '://' + req.get('host');
         filteredFamilies.forEach(family => {
+          console.log(family.members)
             family.members.forEach(member => {
                 if (member.profilePic) {
                     member.profilePic = `${baseUrl}${member.profilePic}`;
@@ -102,7 +103,7 @@ router.get("/viewFamilies", async (req, res) => {
     }
 });
 
-router.patch("/update/:id/:memberId",allowAdmin, captFirstLetter,async (req, res) => {
+router.patch("/update/:id/:memberId",allowAuth,  captFirstLetter,async (req, res) => {
   try {
     const { memberData } = req.body;
 
@@ -154,7 +155,7 @@ router.patch("/update/:id/:memberId",allowAdmin, captFirstLetter,async (req, res
   }
 });
 
-router.delete("/delete/:id/:memberId?",allowAdmin, async (req, res) => {
+router.delete("/delete/:id/:memberId?",allowAuth,  async (req, res) => {
   try {
     const { id, memberId } = req.params;
 
