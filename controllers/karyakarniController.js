@@ -57,14 +57,9 @@ router.get("/getKaryakarnis",allowAuth,  async (req, res) => {
         const excludeFields = ["limit", "sort", "page"];
         excludeFields.forEach(el => delete req.query[el]);
 
-        // Sorting
-        const sortBy = req.query.sort
-        ? req.query.sort.split(",").join(" ")
-        : "name";
-
-        // Pagination settings
-        const page = parseInt(req.query.page, 10) || 1;
-        const limit = parseInt(req.query.limit, 10) || 10;
+        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "_id";
+        const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+        const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
         const skip = (page - 1) * limit;
 
         const total  = await Karyakarni.countDocuments(query);
