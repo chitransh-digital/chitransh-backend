@@ -54,12 +54,9 @@ router.get("/viewFamilies", allowAuth, async (req, res) => {
         const excludeFields = ["limit", "sort", "page"];
         excludeFields.forEach(el => delete req.query[el]);
 
-        // Sorting
-        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "createdAt"; 
-
-        // Pagination settings
-        const page = parseInt(req.query.page, 10) || 1;
-        const limit = parseInt(req.query.limit, 10) || 10;
+        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "_id";
+        const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+        const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
         const skip = (page - 1) * limit;
 
         const total = await Member.countDocuments(query);
@@ -83,7 +80,6 @@ router.get("/viewFamilies", allowAuth, async (req, res) => {
 
         const baseUrl = req.protocol + '://' + req.get('host');
         filteredFamilies.forEach(family => {
-          console.log(family.members)
             family.members.forEach(member => {
                 if (member.profilePic) {
                     member.profilePic = `${baseUrl}${member.profilePic}`;

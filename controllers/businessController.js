@@ -29,14 +29,9 @@ router.get("/getBusinesses", allowAuth, async(req,res)=>{
         });
         let filterStr = JSON.stringify(filter);
     
-        //Sorting
-        const sortBy = req.query.sort
-          ? req.query.sort.split(",").join(" ")
-          : "name";
-    
-        //Pagination
-        const page = req.query.page ? req.query.page : 1;
-        const limit = req.query.limit ? req.query.limit : 10;
+        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "_id";
+        const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+        const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
         const skip = (page - 1) * limit;
     
         const total = await Business.countDocuments();
