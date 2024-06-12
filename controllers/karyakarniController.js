@@ -39,40 +39,28 @@ router.post("/addMember/:id",allowAdmin,  captFirstLetter,async (req, res) => {
 
 router.get("/getKaryakarnis",allowAuth,  async (req, res) => {
     try {
-        const { city, state, name } = req.query;
-        let query = {};
-  
-        if (city) {
-            query.city = city;
-        }
-  
-        if (state) {
-            query.state = state;
-        }
-  
-        if (name) {
-            query.name = name;
-        }
+      const { limit, page, sort } = req.query;
 
-        const excludeFields = ["limit", "sort", "page"];
-        excludeFields.forEach(el => delete req.query[el]);
+      const filter = { ...req.query };
+      ["limit", "sort", "page"].forEach(el => delete filter[el]);
 
-        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "_id";
-        const page = req.query.page ? parseInt(req.query.page, 10) : 1;
-        const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-        const skip = (page - 1) * limit;
+      let filterStr = JSON.stringify(filter);
+      
+      const sortBy = sort ? sort.split(",").join(" ") : "_id";
+      const pageNum = page ? parseInt(page, 10) : 1;
+      const limitNum = limit ? parseInt(limit, 10) : 10;
+      const skip = (pageNum - 1) * limitNum;
 
-        const total  = await Karyakarni.countDocuments(query);
+        const total  = await Karyakarni.countDocuments();
         if (skip >= total) {
-            return res.status(400).json({ message: "page does not exist!"})
+            return res.status(400).json({ message: "Page does not exist!"})
         }
 
-        let karyakarnis = await Karyakarni.find(query)
+        let karyakarnis = await Karyakarni.find(JSON.parse(filterStr))
         .sort(sortBy)
         .skip(skip)
-        .limit(limit);
+        .limit(limitNum);
 
-        // const karyakarniList = karyakarnis;
         const baseUrl = req.protocol + '://' + req.get('host');
         const karyakarniList = karyakarnis.map(karyakarni => {
           if (karyakarni.logo) {

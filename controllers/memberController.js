@@ -35,68 +35,48 @@ router.post("/addMember/:id?", allowAuth, captFirstLetter,async (req, res) => {
 });
 
 router.get("/viewFamilies", allowAuth, async (req, res) => {
-    try {
-        const { city, state, familyID } = req.query;
-        let query = {};
-  
-        if (city) {
-            query["members.city"] = city;
-        }
-  
-        if (state) {
-            query["members.state"] = state;
-        }
-  
-        if (familyID) {
-            query.familyID = familyID;
-        }
+  try {
+      const { limit, page, sort } = req.query;
 
-        const excludeFields = ["limit", "sort", "page"];
-        excludeFields.forEach(el => delete req.query[el]);
+      const filter = { ...req.query };
+      ["limit", "sort", "page"].forEach(el => delete filter[el]);
 
-        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "_id";
-        const page = req.query.page ? parseInt(req.query.page, 10) : 1;
-        const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-        const skip = (page - 1) * limit;
+      let filterStr = JSON.stringify(filter);
+      
+      const sortBy = sort ? sort.split(",").join(" ") : "_id";
+      const pageNum = page ? parseInt(page, 10) : 1;
+      const limitNum = limit ? parseInt(limit, 10) : 10;
+      const skip = (pageNum - 1) * limitNum;
 
-        const total = await Member.countDocuments(query);
-        if (skip >= total) {
-            return res.status(400).json({ message: "Page does not exist!" });
-        }
+      const total = await Member.countDocuments(JSON.parse(filterStr));
+      if (skip >= total) {
+          return res.status(400).json({ message: "Page does not exist!" });
+      }
 
-        let families = await Member.find(query)
-                                   .sort(sortBy)
-                                   .skip(skip)
-                                   .limit(limit);
+      let families = await Member.find(JSON.parse(filterStr))
+                                 .sort(sortBy)
+                                 .skip(skip)
+                                 .limit(limitNum);
 
-        if (!families || families.length === 0) {
-            return res.status(404).json({ message: "No families found." });
-        }
+      const baseUrl = req.protocol + '://' + req.get('host');
+      families.forEach(family => {
+          family.members.forEach(member => {
+              if (member.profilePic) {
+                  member.profilePic = `${baseUrl}${member.profilePic}`;
+              }
+          });
+      });
 
-        const filteredFamilies = city || state ? families.filter(family => {
-            const head = family.members.find(member => member.relation.toLowerCase() === "head");
-            return head && head.city.toLowerCase() === city.toLowerCase() && head.state.toLowerCase() === state.toLowerCase();
-        }) : families;
-
-        const baseUrl = req.protocol + '://' + req.get('host');
-        filteredFamilies.forEach(family => {
-            family.members.forEach(member => {
-                if (member.profilePic) {
-                    member.profilePic = `${baseUrl}${member.profilePic}`;
-                }
-            });
-        });
-
-        res.status(200).json({
-            families: filteredFamilies,
-            count: filteredFamilies.length,
-            status: true,
-            message: "Families fetched successfully!"
-        });
-    } catch (error) {
-        console.error("Error viewing families:", error.message);
-        res.status(500).json({ error: "Internal server error" });
-    }
+      res.status(200).json({
+          families: families,
+          count: families.length,
+          status: true,
+          message: "Families fetched successfully!"
+      });
+  } catch (error) {
+      console.error("Error viewing families:", error.message);
+      res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 router.patch("/update/:id/:memberId",allowAuth,  captFirstLetter,async (req, res) => {
