@@ -9,7 +9,7 @@ router.post("/add",allowAdmin,captFirstLetter, async (req, res) => {
     const job = new Jobs(req.body);
     const savedJob = await job.save();
     if (!savedJob) {
-      throw new Error("Couldn't add job");
+      res.status(400).json({ status: false, message: "Failed to add job" });
     }
     res.status(200).json({ status: true, message: "Job added successfully" });
   } catch (err) {
@@ -32,7 +32,7 @@ router.get("/getAll",allowAuth, async (req, res) => {
         const skip = (page - 1) * limit;
     
         const total = await Jobs.countDocuments();
-        if (skip >= total) throw new Error("Page does not exist!");
+        if (skip >= total) return res.status(400).json({ message: "Page does not exist!" });
     
         let filterQuery = await Jobs.find(JSON.parse(filterStr))
           .sort(sortBy)
@@ -48,7 +48,7 @@ router.patch("/update/:id",allowAdmin,captFirstLetter, async (req, res) => {
   try {
     const job = await Jobs.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!job) {
-      throw new Error("Couldn't update job");
+      res.status(400).json({ status: false, message: "Couldn't update job" });
     }
     res.status(200).json({ status: true, message: "Job updated successfully" });
   } catch (err) {
@@ -60,7 +60,7 @@ router.delete("/delete/:id",allowAdmin, async (req, res) => {
   try {
     const job = await Jobs.findByIdAndDelete(req.params.id);
     if (!job) {
-      throw new Error("Couldn't delete job");
+      res.status(400).json({ status: false, message: "Couldn't delete job" });
     }
     res.status(200).json({ status: true, message: "Job deleted successfully" });
   } catch (err) {

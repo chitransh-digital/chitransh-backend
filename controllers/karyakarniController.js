@@ -11,7 +11,7 @@ router.post("/registerKaryakarni",allowAdmin,  captFirstLetter,async (req, res) 
         const karyakarni = new Karyakarni(req.body);
         const newKaryakarni = await karyakarni.save();
         if (!newKaryakarni) {
-        throw new Error("Couldn't add karyakarni");
+          res.status(400).json({ status: false, message: "Failed to add Karyakarni" });
         }
         res.status(200).json({ status: true, message: "Karyakarni added successfully" });
     } catch (err) {
@@ -94,7 +94,7 @@ router.patch("/update/:id",  allowAdmin, captFirstLetter,async (req, res) => {
   try {
     const karyakarni = await Karyakarni.findById(req.params.id);
     if (!karyakarni) {
-      throw new Error("Couldn't find karyakarni");
+      res.status(404).json({ status: false, message: "Karyakarni not found" });
     }
     if (req.body.logo) {
       const baseUrl = req.protocol + '://' + req.get('host');
@@ -121,7 +121,7 @@ router.patch("/update/:id",  allowAdmin, captFirstLetter,async (req, res) => {
 
     const updatedKaryakarni = await Karyakarni.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedKaryakarni) {
-      throw new Error("Couldn't update karyakarni");
+      res.status(400).json({ status: false, message: "Failed to update karyakarni" });
     }
     const baseUrl = req.protocol + '://' + req.get('host');
     updatedKaryakarni.logo = `${baseUrl}${updatedKaryakarni.logo}`;
@@ -135,12 +135,12 @@ router.patch("/update/:id/:memberId", allowAdmin,  captFirstLetter,async (req, r
   try {
     const karyakarni = await Karyakarni.findById(req.params.id);
     if (!karyakarni) {
-      throw new Error("Couldn't find karyakarni");
+      res.status(404).json({ status: false, message: "Karyakarni not found" });
     }
     const { newData } = req.body;
     const karyakarniMember = karyakarni.members.find(member => member._id.toString() == req.params.memberId);
     if (!karyakarniMember) {
-      throw new Error("Couldn't find karyakarni member");
+      res.status(404).json({ status: false, message: "Member not found in the karyakarni" });
     }
     if (newData.profilePic) {
       const baseUrl = req.protocol + '://' + req.get('host');
@@ -185,12 +185,12 @@ router.patch("/update/:id/:memberId", allowAdmin,  captFirstLetter,async (req, r
       if (id && memberId) {
         const karyakarni = await Karyakarni.findById(id);
         if (!karyakarni) {
-          throw new Error("Karyakarni not found");
+          res.status(404).json({ status: false, message: "Karyakarni not found" });
         }
   
         const memberIndex = karyakarni.members.findIndex(member => member._id.toString() == memberId);
         if (memberIndex === -1) {
-          throw new Error("Member not found in the karyakarni");
+          res.status(404).json({ status: false, message: "Member not found in the karyakarni" });
         }
   
         const deletedMember = karyakarni.members.splice(memberIndex, 1)[0];
@@ -209,7 +209,7 @@ router.patch("/update/:id/:memberId", allowAdmin,  captFirstLetter,async (req, r
       } else if (id && !memberId) {
         const deletedKaryakarni = await Karyakarni.findByIdAndDelete(id);
         if (!deletedKaryakarni) {
-          throw new Error("Karyakarni not found");
+          res.status(404).json({ status: false, message: "Karyakarni not found" });
         }
         deletedKaryakarni && deletedKaryakarni.members.forEach(member => {
           if (member.profilePic) {
@@ -224,7 +224,7 @@ router.patch("/update/:id/:memberId", allowAdmin,  captFirstLetter,async (req, r
   
         res.status(200).json({ status: true, message: "Karyakarni deleted successfully", deletedFamily });
       } else {
-        throw new Error("Invalid request parameters");
+        res.status(400).json({ status: false, message: "Invalid request" });
       }
     } catch (err) {
       res.status(400).json({ status: false, message: err.message });

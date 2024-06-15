@@ -11,7 +11,7 @@ router.post("/uploadFeeds",allowAdmin,captFirstLetter,async(req,res)=>{
         const Feed = new Feeds(req.body);
         const newFeeds = await Feed.save();
         if (!newFeeds) {
-          throw new Error("Couldn't add Feeds");
+          res.status(400).json({ status: false, message: "Failed to add Feeds" });
         }
         res.status(200).json({ status: true, message: "Feeds added successfully" });
       } catch (err) {
@@ -34,14 +34,13 @@ router.get("/getFeeds",allowAuth,async(req,res)=>{
         const skip = (page - 1) * limit;
     
         const total = await Feeds.countDocuments();
-        if (skip >= total) throw new Error("Page does not exist!");
+        if (skip >= total) return res.status(400).json({ message: "Page does not exist!" });
     
         let filterQuery = await Feeds.find(JSON.parse(filterStr))
           .sort(sortBy)
           .skip(skip)
           .limit(limit);
     
-        // const FeedsList = filterQuery;
         const baseUrl = req.protocol + '://' + req.get('host');
         const FeedsList = filterQuery.map(feed => {
           if (feed.images && feed.images.length > 0) {
@@ -57,7 +56,7 @@ router.get("/getFeeds",allowAuth,async(req,res)=>{
           message: "Feeds fetched successfully!",
         });
       } catch (error) {
-        throw new Error(error);
+        res.status(500).json({ status: false, message: error.message });
       }
 });
 
@@ -65,7 +64,7 @@ router.patch("/update/:id",allowAdmin,  captFirstLetter,async (req, res) => {
   try {
     const feed = await Feeds.findById(req.params.id);
     if (!feed) {
-      throw new Error("Couldn't find feed");
+      res.status(404).json({ status: false, message: "Feed not found" });
     }
     if (req.body.images) {
       const baseUrl = req.protocol + '://' + req.get('host');
@@ -84,7 +83,7 @@ router.patch("/update/:id",allowAdmin,  captFirstLetter,async (req, res) => {
     
     const updatedFeed = await Feeds.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedFeed) {
-      throw new Error("Couldn't update feed");
+      res.status(400).json({ status: false, message: "Failed to update feed" });
     }
     
     const baseUrl = req.protocol + '://' + req.get('host');
@@ -100,12 +99,11 @@ router.patch("/update/:id",allowAdmin,  captFirstLetter,async (req, res) => {
     try {
       const feed = await Feeds.findById(req.params.id);
       if (!feed) {
-        throw new Error("Couldn't find feed");
+        res.status(404).json({ status: false, message: "Feed not found" });
       }
       try {
         const imageURL = feed.images[0];
         const filePath = path.join(__dirname,'..', imageURL);
-        console.log("Deleting image:",filePath)
         if(feed.images.length > 0){
           fs.unlink(filePath, (err) => {
             if (err) {
