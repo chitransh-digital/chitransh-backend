@@ -11,7 +11,7 @@ router.post("/registerBusiness", allowAuth, captFirstLetter, async(req,res)=>{
         const business = new Business(req.body);
         const businessJob = await business.save();
         if (!businessJob) {
-          throw new Error("Couldn't add business");
+          res.status(400).json({ status: false, message: "Failed to add Business" });
         }
         res.status(200).json({ status: true, message: "Business added successfully" });
       } catch (err) {
@@ -35,15 +35,13 @@ router.get("/getBusinesses", allowAuth, async(req,res)=>{
         const skip = (page - 1) * limit;
     
         const total = await Business.countDocuments();
-        // console.log(total);
-        if (skip >= total) throw new Error("Page does not exist!");
+        if (skip >= total) return res.status(400).json({ message: "Page does not exist!" });
     
         let filterQuery = await Business.find(JSON.parse(filterStr))
           .sort(sortBy)
           .skip(skip)
           .limit(limit);
     
-        // const businessList = filterQuery;
         const baseUrl = req.protocol + '://' + req.get('host');
         const BusinessList = filterQuery.map(business => {
           if (business.images && business.images.length > 0) {
@@ -62,7 +60,7 @@ router.get("/getBusinesses", allowAuth, async(req,res)=>{
           message: "Businesses fetched successfully!",
         });
       } catch (error) {
-        throw new Error(error);
+        res.status(500).json({ status: false, message: error.message });
       }
 });
 
@@ -70,9 +68,8 @@ router.patch("/updateBusiness/:id",allowAuth, captFirstLetter,async (req, res) =
   try {
     const business = await Business.findById(req.params.id);
     if (!business) {
-      throw new Error("Couldn't update business");
+      res.status(404).json({ status: false, message: "Business not found" });
     }
-    console.log(req.body)
     if (req.body.images) {
       const baseUrl = req.protocol + '://' + req.get('host');
       req.body.images[0] = req.body.images[0].replace(baseUrl, '');
@@ -102,7 +99,7 @@ router.patch("/updateBusiness/:id",allowAuth, captFirstLetter,async (req, res) =
 
     const updatedBusiness = await Business.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if(!updatedBusiness){
-      throw new Error("Couldn't update business");
+      res.status(400).json({ status: false, message: "Failed to update business" });
     }
 
     const baseUrl = req.protocol + '://' + req.get('host');
@@ -118,7 +115,7 @@ router.delete("/deleteBusiness/:id",allowAuth, async (req, res) => {
   try {
     const business = await Business.findById(req.params.id);
     if (!business) {
-      throw new Error("Couldn't delete business");
+      res.status(404).json({ status: false, message: "Business not found" });
     }
     try{
       if(business.images && business.images.length > 0){
@@ -138,7 +135,7 @@ router.delete("/deleteBusiness/:id",allowAuth, async (req, res) => {
         });
       }
     }catch(err){
-      throw new Error(err);
+      console.error('Failed to delete image:', err.message);
     }
     await Business.findByIdAndDelete(req.params.id);
     res.status(200).json({ status: true, message: "Business deleted successfully" });

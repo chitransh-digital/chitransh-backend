@@ -61,29 +61,29 @@ router.put("/changeAdminPassword", allowAdmin, async (req, res) => {
   }
 });
 
-// router.post("/signinAdmin", async (req, res) => {
-//   try {
-//     const admin = await AdminConfig.findOne();
-//     if (admin) {
-//       const deletedAdmin = await AdminConfig.deleteOne({ _id: admin._id });
-//       if (!deletedAdmin) {
-//         throw new Error("Couldn't delete admin");
-//       }
-//     }
-//     const { password } = req.body;
-//     bcrypt.hash(password, 10, async function (err, hash) {
-//       const admin = new AdminConfig({ password: hash });
-//       const savedAdmin = await admin.save();
-//       if (!savedAdmin) {
-//         throw new Error("Couldn't create admin");
-//       }
-//       res
-//         .status(200)
-//         .json({ status: true, message: "Admin created successfully", admin: savedAdmin });
-//     });
-//   } catch (err) {
-//     res.status(400).json({ status: false, message: err.message });
-//   }
-// });
+router.post("/signinAdmin", async (req, res) => {
+  try {
+    const admin = await AdminConfig.findOne();
+    if (admin) {
+      const deletedAdmin = await AdminConfig.deleteOne({ _id: admin._id });
+      if (!deletedAdmin) {
+        res.status(400).json({ status: false, message: "Couldn't delete admin" });
+      }
+    }
+    const { password } = req.body;
+    bcrypt.hash(password, 10, async function (err, hash) {
+      const admin = new AdminConfig({ password: hash });
+      const savedAdmin = await admin.save();
+      if (!savedAdmin) {
+        res.status(400).json({ status: false, message: "Failed to create admin" });
+      }
+      res
+        .status(200)
+        .json({ status: true, message: "Admin created successfully", admin: savedAdmin });
+    });
+  } catch (err) {
+    res.status(400).json({ status: false, message: err.message });
+  }
+});
 
 module.exports = router;

@@ -36,8 +36,7 @@ router.post("/addMember/:id?", allowAuth, captFirstLetter,async (req, res) => {
 
 router.get("/viewFamilies", allowAuth, async (req, res) => {
   try {
-      const { limit, page, sort } = req.query;
-
+      const { limit, page, sort, contact } = req.query;
       const filter = { ...req.query };
       ["limit", "sort", "page"].forEach(el => delete filter[el]);
 
@@ -47,16 +46,30 @@ router.get("/viewFamilies", allowAuth, async (req, res) => {
       const pageNum = page ? parseInt(page, 10) : 1;
       const limitNum = limit ? parseInt(limit, 10) : 10;
       const skip = (pageNum - 1) * limitNum;
-
-      const total = await Member.countDocuments(JSON.parse(filterStr));
+      let total = 0
+      if(filterStr && filterStr.includes("contact")){
+        total = await Member.find({ "members.0.contact": contact }).countDocuments();
+      }
+      else{
+        total = await Member.countDocuments(JSON.parse(filterStr));
+      }
       if (skip >= total) {
           return res.status(400).json({ message: "Page does not exist!" });
       }
-
-      let families = await Member.find(JSON.parse(filterStr))
-                                 .sort(sortBy)
-                                 .skip(skip)
-                                 .limit(limitNum);
+      
+      let families = []
+      if(filterStr && filterStr.includes("contact")){
+        families = await Member.find({ "members.0.contact": contact })
+                                .sort(sortBy)
+                                .skip(skip)
+                                .limit(limitNum);
+      }
+      else{
+        families = await Member.find(JSON.parse(filterStr))
+                                .sort(sortBy)
+                                .skip(skip)
+                                .limit(limitNum);
+      }
 
       const baseUrl = req.protocol + '://' + req.get('host');
       families.forEach(family => {
@@ -85,12 +98,12 @@ router.patch("/update/:id/:memberId",allowAuth,  captFirstLetter,async (req, res
 
     const family = await Member.findById(req.params.id);
     if (!family) {
-      throw new Error("Family not found");
+      res.status(404).json({ status: false, message: "Family not found" });
     }
 
     const memberToUpdate = family.members.find(member => member._id.toString() == req.params.memberId);
     if (!memberToUpdate) {
-      throw new Error("Member not found in the family");
+      res.status(404).json({ status: false, message: "Member not found" });
     }
 
     const oldProfilePic = memberToUpdate.profilePic;
@@ -138,12 +151,12 @@ router.delete("/delete/:id/:memberId?",allowAuth,  async (req, res) => {
     if (id && memberId) {
       const family = await Member.findById(id);
       if (!family) {
-        throw new Error("Family not found");
+        res.status(404).json({ status: false, message: "Family not found" });
       }
 
       const memberIndex = family.members.findIndex(member => member._id.toString() == memberId);
       if (memberIndex === -1) {
-        throw new Error("Member not found in the family");
+        res.status(404).json({ status: false, message: "Member not found in the family" });
       }
 
       const deletedMember = family.members.splice(memberIndex, 1)[0];
@@ -162,7 +175,7 @@ router.delete("/delete/:id/:memberId?",allowAuth,  async (req, res) => {
     } else if (id && !memberId) {
       const deletedFamily = await Member.findByIdAndDelete(id);
       if (!deletedFamily) {
-        throw new Error("Family not found");
+        res.status(404).json({ status: false, message: "Family not found" });
       }
       deletedFamily.members.forEach(member => {
         if (member.profilePic) {
@@ -177,7 +190,7 @@ router.delete("/delete/:id/:memberId?",allowAuth,  async (req, res) => {
 
       res.status(200).json({ status: true, message: "Family deleted successfully", deletedFamily });
     } else {
-      throw new Error("Invalid request parameters");
+      res.status(400).json({ status: false, message: "Invalid request" });
     }
   } catch (err) {
     res.status(400).json({ status: false, message: err.message });
