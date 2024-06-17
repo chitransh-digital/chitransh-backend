@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../middlewares/multerMiddleware');
+const uploadMiddleware = require('../middlewares/multerMiddleware');
 const fs = require('fs');
 const path = require('path');
 const { allowAuth } = require('../middlewares/authMiddleware');
 
 router.post('/upload',allowAuth, (req, res) => {
-    upload(req, res, (err) => {
+    uploadMiddleware(req, res, (err) => {
       if (err) {
         return res.status(400).json({ message: err });
       }

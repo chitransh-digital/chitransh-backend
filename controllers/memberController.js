@@ -3,33 +3,48 @@ const router = express.Router();
 const Member = require("../models/Member");
 const fs = require("fs");
 const path = require("path");
+const uploadImage = require('../middlewares/multerMiddleware');
 const { allowAuth } = require("../middlewares/authMiddleware");
 const { captFirstLetter } = require("../middlewares/capitalizationMiddleware");
 
-router.post("/addMember/:id?", allowAuth, captFirstLetter,async (req, res) => {
+router.post('/addMember/:id', allowAuth, captFirstLetter,async (req, res) => {
   try {
-    const { familyID, memberData } = req.body;
+    const { memberData } = req.body;
 
-    let family;
-    if(req.params.id){
-      family = await Member.findById(req.params.id);
-      if (!family) {
-        return res.status(404).json({ message: "Family not found." });
-      }
-      family.members.push(memberData);
-      await family.save();
-    }
-    else{
-       family = new Member({
-        familyID,
-        members: [memberData]
-      });
-      await family.save();
+    let family = await Member.findById(req.params.id);
+    if (!family) {
+      return res.status(404).json({ message: "Family not found." });
     }
 
-    res.status(201).json({ family, message: "Family member created successfully!" });
+    family.members.push(memberData);
+    await family.save();
+
+    res.status(201).json({ family, message: "Family member added successfully!" });
   } catch (error) {
-    console.error("Error adding family:", error.message);
+    console.error("Error adding family member:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post('/createFamily',uploadImage, captFirstLetter, async (req, res) => {
+  try {
+    console.log(req.body, req.file)
+    const { familyID, memberData } = req.body;
+    const memberDataParsed = JSON.parse(memberData);
+
+    if (req.file) {
+      memberDataParsed.profilePic = `/uploads/${req.file.filename}`;
+    }
+
+    const family = new Member({
+      familyID,
+      members: [memberDataParsed],
+    });
+    await family.save();
+
+    res.status(201).json({ family, message: "Family created successfully!" });
+  } catch (error) {
+    console.error("Error creating family:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 });
