@@ -61,8 +61,7 @@ const memberSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-        occupationDetails: [
-            {
+        occupationDetails: {
                 jobPost: {
                     type: String,
                     required: false
@@ -91,13 +90,12 @@ const memberSchema = new mongoose.Schema({
                     type: String,
                     required: false
                 },
-            }
-        ],
+            },
         education: {
             type: String,
             required: true
         },
-        educationDetails: [
+        educationDetails: 
             {
                 course: {
                     type: String,
@@ -116,7 +114,7 @@ const memberSchema = new mongoose.Schema({
                     required: false
                 }
             }
-        ]
+        
     }]
 },
 {
