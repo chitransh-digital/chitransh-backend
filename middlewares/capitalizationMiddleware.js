@@ -1,5 +1,5 @@
 const captFirstLetter = (req, res, next) => {
-    const skipFields = ['images', 'logo', 'profilePic','attachments'];
+    const skipFields = ['images', 'logo', 'profilePic','attachments', 'link', 'coupon'];
 
     const capitalize = (value) => {
         if (typeof value === 'string') {
@@ -18,6 +18,15 @@ const captFirstLetter = (req, res, next) => {
 
     if (req.body) {
         req.body = capitalize(req.body);
+        if (req.body.memberData && typeof req.body.memberData === 'string') {
+            try {
+                const parsedMemberData = JSON.parse(req.body.memberData);
+                const capitalizedMemberData = capitalize(parsedMemberData);
+                req.body.memberData = JSON.stringify(capitalizedMemberData);
+            } catch (error) {
+                console.error('Error parsing memberData:', error.message);
+            }
+        }
     }
 
     next();
