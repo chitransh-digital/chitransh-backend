@@ -3,7 +3,7 @@ const router = express.Router();
 const Member = require("../models/Member");
 const fs = require("fs");
 const path = require("path");
-const uploadImage = require('../middlewares/multerMiddleware');
+const {uploadImage} = require('../middlewares/multerMiddleware');
 const { allowAuth } = require("../middlewares/authMiddleware");
 const { captFirstLetter } = require("../middlewares/capitalizationMiddleware");
 
@@ -28,7 +28,6 @@ router.post('/addMember/:id', allowAuth, captFirstLetter,async (req, res) => {
 
 router.post('/createFamily',uploadImage, captFirstLetter, async (req, res) => {
   try {
-    console.log(req.body, req.file)
     const { familyID, memberData } = req.body;
     const memberDataParsed = JSON.parse(memberData);
 

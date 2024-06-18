@@ -8,7 +8,7 @@ const storage = multer.diskStorage({
   }
 });
 
-export const uploadMiddleware = multer({
+const uploadMiddleware = multer({
   storage: storage,
   limits: { fileSize: 100000000 },
   fileFilter: (req, file, cb) => {
@@ -29,14 +29,12 @@ function checkFileType(file, cb) {
 }
 
 const uploadImage = (req, res, next) => {
-  console.log(req.body, req.file, "nw");
   uploadMiddleware(req, res, (err) => {
     if (err) {
-      return res.status(400).json({ message: err });
+      console.error('Error uploading file:', err);
     }
     next();
   });
-  next();
 };
 
-module.exports = uploadImage;
+module.exports = {uploadImage, uploadMiddleware};

@@ -43,6 +43,11 @@ const karyakarniSchema = new mongoose.Schema({
             type: String,
             default: ''
         },
+        contact: {
+            type: String,
+            required: false,
+            match: [/^\d{10}$/, "Please fill a valid contact number"]
+        },
         profilePic: {
             type: String,
             default: ''
