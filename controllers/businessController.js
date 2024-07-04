@@ -35,6 +35,7 @@ router.get("/getBusinesses", allowAuth, async(req,res)=>{
         const skip = (page - 1) * limit;
     
         const total = await Business.countDocuments();
+        const totalPages = Math.ceil(total / limit);
         if (skip >= total) return res.status(400).json({ message: "Page does not exist!" });
     
         let filterQuery = await Business.find(JSON.parse(filterStr))
@@ -56,6 +57,7 @@ router.get("/getBusinesses", allowAuth, async(req,res)=>{
         res.json({
           businesses: BusinessList,
           count: BusinessList.length,
+          totalPages: totalPages,
           status: true,
           message: "Businesses fetched successfully!",
         });

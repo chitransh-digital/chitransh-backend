@@ -67,6 +67,7 @@ router.get("/viewFamilies", allowAuth, async (req, res) => {
       else{
         total = await Member.countDocuments(JSON.parse(filterStr));
       }
+      const totalPages = Math.ceil(total / limitNum);
       if (skip >= total) {
           return res.status(400).json({ message: "Page does not exist!" });
       }
@@ -97,6 +98,7 @@ router.get("/viewFamilies", allowAuth, async (req, res) => {
       res.status(200).json({
           families: families,
           count: families.length,
+          totalPages: totalPages,
           status: true,
           message: "Families fetched successfully!"
       });
