@@ -62,6 +62,7 @@ router.put("/changeAdminPassword", allowAdmin, async (req, res) => {
 });
 
 router.post("/signinAdmin", async (req, res) => {
+  res.send('This route is blocked. Remove res.send() to enable this route');
   try {
     const admin = await AdminConfig.findOne();
     if (admin) {

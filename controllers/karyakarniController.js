@@ -37,60 +37,62 @@ router.post("/addMember/:id",allowAdmin,  captFirstLetter,async (req, res) => {
   }
 });
 
-router.get("/getKaryakarnis",allowAuth,  async (req, res) => {
-    try {
+router.get("/getKaryakarnis", allowAuth, async (req, res) => {
+  try {
       const { limit, page, sort } = req.query;
 
       const filter = { ...req.query };
       ["limit", "sort", "page"].forEach(el => delete filter[el]);
 
       let filterStr = JSON.stringify(filter);
-      
+
       const sortBy = sort ? sort.split(",").join(" ") : "_id";
       const pageNum = page ? parseInt(page, 10) : 1;
       const limitNum = limit ? parseInt(limit, 10) : 10;
       const skip = (pageNum - 1) * limitNum;
 
-        const total  = await Karyakarni.countDocuments();
-        const totalPages = Math.ceil(total / limitNum);
-        if (skip >= total) {
-            return res.status(400).json({ message: "Page does not exist!"})
-        }
+      const total = await Karyakarni.countDocuments();
+      const totalPages = Math.ceil(total / limitNum);
+      
+      if (skip >= total) {
+          return res.status(400).json({ message: "Page does not exist!" });
+      }
 
-        let karyakarnis = await Karyakarni.find(JSON.parse(filterStr))
-        .sort(sortBy)
-        .skip(skip)
-        .limit(limitNum);
+      let karyakarnis = await Karyakarni.find(JSON.parse(filterStr))
+          .sort(sortBy)
+          .skip(skip)
+          .limit(limitNum);
 
-        const baseUrl = req.protocol + '://' + req.get('host');
-        const karyakarniList = karyakarnis.map(karyakarni => {
+      const baseUrl = req.protocol + '://' + req.get('host');
+      const karyakarniList = karyakarnis.map(karyakarni => {
           if (karyakarni.logo) {
-            karyakarni.logo = `${baseUrl}${karyakarni.logo}`;
+              karyakarni.logo = `${baseUrl}${karyakarni.logo}`;
           }
           if (karyakarni.members && karyakarni.members.length > 0) {
-            karyakarni.members = karyakarni.members.map(member => {
-              if (member.profilePic) {
-                member.profilePic = `${baseUrl}${member.profilePic}`;
-              }
-              return member;
-            });
+              karyakarni.members = karyakarni.members.map(member => {
+                  if (member.profilePic) {
+                      member.profilePic = `${baseUrl}${member.profilePic}`;
+                  }
+                  return member;
+              });
           }
           return karyakarni;
-        });
+      });
 
-        res.status(200).json({
-            karyakarni: karyakarniList,
-            count: karyakarniList.length,
-            totalPages: totalPages,
-            status: true,
-            message: "Karyakarnis fetched successfully!"
-        });
+      res.status(200).json({
+          karyakarni: karyakarniList,
+          count: karyakarniList.length,
+          totalPages: totalPages,
+          status: true,
+          message: "Karyakarnis fetched successfully!"
+      });
 
-    }catch (error) {
-        console.error("Error fetching karyakarnis:", error.message);
-        res.status(500).json({ error: "Internal server error" });
-    }
-}) ;
+  } catch (error) {
+      console.error("Error fetching karyakarnis:", error.message);
+      res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 router.patch("/update/:id",  allowAdmin, captFirstLetter,async (req, res) => {
   try {
