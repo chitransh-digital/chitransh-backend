@@ -32,13 +32,14 @@ router.get("/getAll",allowAuth, async (req, res) => {
         const skip = (page - 1) * limit;
     
         const total = await Jobs.countDocuments();
+        const totalPages = Math.ceil(total / limit);
         if (skip >= total) return res.status(400).json({ message: "Page does not exist!" });
     
         let filterQuery = await Jobs.find(JSON.parse(filterStr))
           .sort(sortBy)
           .skip(skip)
           .limit(limit);
-    res.status(200).json({ status: true, jobs: filterQuery, count: filterQuery.length });
+    res.status(200).json({ status: true, jobs: filterQuery, count: filterQuery.length, totalPages: totalPages });
   } catch (err) {
     res.status(400).json({ status: false, message: err.message });
   }

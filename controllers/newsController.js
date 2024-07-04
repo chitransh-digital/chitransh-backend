@@ -34,6 +34,7 @@ router.get("/getFeeds",allowAuth,async(req,res)=>{
         const skip = (page - 1) * limit;
     
         const total = await Feeds.countDocuments();
+        const totalPages = Math.ceil(total / limit);
         if (skip >= total) return res.status(400).json({ message: "Page does not exist!" });
     
         let filterQuery = await Feeds.find(JSON.parse(filterStr))
@@ -52,6 +53,7 @@ router.get("/getFeeds",allowAuth,async(req,res)=>{
         res.json({
           Feeds: FeedsList,
           count: FeedsList.length,
+          totalPages: totalPages,
           status: true,
           message: "Feeds fetched successfully!",
         });

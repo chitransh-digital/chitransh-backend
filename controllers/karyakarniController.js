@@ -52,6 +52,7 @@ router.get("/getKaryakarnis",allowAuth,  async (req, res) => {
       const skip = (pageNum - 1) * limitNum;
 
         const total  = await Karyakarni.countDocuments();
+        const totalPages = Math.ceil(total / limitNum);
         if (skip >= total) {
             return res.status(400).json({ message: "Page does not exist!"})
         }
@@ -80,6 +81,7 @@ router.get("/getKaryakarnis",allowAuth,  async (req, res) => {
         res.status(200).json({
             karyakarni: karyakarniList,
             count: karyakarniList.length,
+            totalPages: totalPages,
             status: true,
             message: "Karyakarnis fetched successfully!"
         });
