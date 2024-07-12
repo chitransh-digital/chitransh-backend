@@ -16,7 +16,8 @@ const memberSchema = new mongoose.Schema({
         },
         landmark: {
             type: String,
-            required: true
+            required: false,
+            default: ''
         },
         city: {
             type: String,
