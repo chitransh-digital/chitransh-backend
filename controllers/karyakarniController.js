@@ -94,6 +94,30 @@ router.get("/getKaryakarnis", allowAuth, async (req, res) => {
 });
 
 
+router.get("/getAllKaryakarnis", async (req, res) => {
+  try {
+    const karyakarnis = await Karyakarni.find().select('-designations -members -logo -landmark -address');
+    const baseUrl = req.protocol + '://' + req.get('host');
+    karyakarnis.forEach(karyakarni => {
+      if (karyakarni.logo) {
+        karyakarni.logo = `${baseUrl}${karyakarni.logo}`;
+      }
+      if (karyakarni.members && karyakarni.members.length > 0) {
+        karyakarni.members = karyakarni.members.map(member => {
+          if (member.profilePic) {
+            member.profilePic = `${baseUrl}${member.profilePic}`;
+          }
+          return member;
+        });
+      }
+    });
+    res.status(200).json({ status: true, karyakarni: karyakarnis, message: "Karyakarnis fetched successfully!" });
+  } catch (err) {
+    res.status(400).json({ status: false, message: err.message });
+  }
+})
+
+
 router.patch("/update/:id",  allowAdmin, captFirstLetter,async (req, res) => {
   try {
     const karyakarni = await Karyakarni.findById(req.params.id);
