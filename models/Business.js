@@ -12,7 +12,7 @@ const businessSchema = new mongoose.Schema(
       required: true,
     },
     contact: {
-      type: Number,
+      type: String,
       required: true,
       match: [/^\d{10}$/, "Please fill a valid contact number"],
     },
