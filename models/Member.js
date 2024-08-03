@@ -38,7 +38,7 @@ const memberSchema = new mongoose.Schema({
             default: ''
         },
         contact: {
-            type: String,
+            type: Number,
             required: false,
             match: [/^\d{10}$/, "Please fill a valid contact number"]
         },

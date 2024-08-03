@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   phone: {
-    type: String,
+    type: Number,
     required: true,
     match: [/^\d{10}$/, "Please fill a valid phone number"]
   },
