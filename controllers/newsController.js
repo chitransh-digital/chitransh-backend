@@ -28,7 +28,7 @@ router.get("/getFeeds",allowAuth,async(req,res)=>{
         });
         let filterStr = JSON.stringify(filter);
     
-        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "-created_at";
+        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "-timestamps";
         const page = req.query.page ? parseInt(req.query.page, 10) : 1;
         const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
         const skip = (page - 1) * limit;
