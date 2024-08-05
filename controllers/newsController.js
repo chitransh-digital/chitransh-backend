@@ -28,7 +28,7 @@ router.get("/getFeeds",allowAuth,async(req,res)=>{
         });
         let filterStr = JSON.stringify(filter);
     
-        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "_id";
+        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "-created_at";
         const page = req.query.page ? parseInt(req.query.page, 10) : 1;
         const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
         const skip = (page - 1) * limit;
@@ -65,21 +65,28 @@ router.get("/getFeeds",allowAuth,async(req,res)=>{
 router.patch("/update/:id",allowAdmin,  captFirstLetter,async (req, res) => {
   try {
     const feed = await Feeds.findById(req.params.id);
+    req.body = { ...req.body, updated_at: Date.now() };
     if (!feed) {
       res.status(404).json({ status: false, message: "Feed not found" });
     }
     if (req.body.images) {
       const baseUrl = req.protocol + '://' + req.get('host');
-      req.body.images[0] = req.body.images[0].replace(baseUrl, '');
+      for (let i = 0; i < req.body.images.length; i++) {
+        if (req.body.images[i].startsWith(baseUrl)) {
+          req.body.images[i] = req.body.images[i].replace(baseUrl, '');
+        }
+      }
     }
     if (req.body.images) {
       if (feed.images && feed.images.length > 0) {
-        const oldImagePath = path.join(__dirname, '..', feed.images[0]);
-        fs.unlink(oldImagePath, (err) => {
-          if (err && err.code !== 'ENOENT') {
-            console.error('Failed to delete old image:', err.message);
-          }
-        });
+        for (const image of feed.images) {
+          const oldImagePath = path.join(__dirname, '..', image);
+          fs.unlink(oldImagePath, (err) => {
+            if (err && err.code !== 'ENOENT') {
+              console.error('Failed to delete old image:', err.message);
+            }
+          });
+        }
       }
     }
     
@@ -104,18 +111,12 @@ router.patch("/update/:id",allowAdmin,  captFirstLetter,async (req, res) => {
         res.status(404).json({ status: false, message: "Feed not found" });
       }
       try {
-        const imageURL = feed.images[0];
-        const filePath = path.join(__dirname,'..', imageURL);
-        if(feed.images.length > 0){
-          fs.unlink(filePath, (err) => {
-            if (err) {
-              if (err.code === 'ENOENT') {
-                return res.status(404).json({ message: 'File not found' });
-              }
-              return res.status(500).json({ message: 'Failed to delete file' });
+        for (const image of feed.images) {
+          const imagePath = path.join(__dirname, '..', image);
+          fs.unlink(imagePath, (err) => {
+            if (err && err.code !== 'ENOENT') {
+              console.error('Failed to delete image:', err.message);
             }
-        
-            console.log('File deleted successfully');
           });
         }
       } catch (error) {

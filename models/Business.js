@@ -14,6 +14,7 @@ const businessSchema = new mongoose.Schema(
     contact: {
       type: String,
       required: true,
+      match: [/^\d{10}$/, "Please fill a valid contact number"],
     },
     desc: {
       type: String,
@@ -51,6 +52,14 @@ const businessSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    created_at: {
+      type: Date,
+      default: Date.now
+    },
+    updated_at: {
+        type: Date,
+        default: Date.now
+    },
   },
   {
     toJSON: {
@@ -60,7 +69,10 @@ const businessSchema = new mongoose.Schema(
         delete ret.__v;
       },
     },
-  }
+  },
+  {
+    timestamps: true,
+  },
 );
 
 const Business = mongoose.model("Business", businessSchema);

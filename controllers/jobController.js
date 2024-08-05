@@ -4,7 +4,7 @@ const Jobs = require("../models/Job");
 const { allowAdmin, allowAuth } = require("../middlewares/authMiddleware");
 const { captFirstLetter } = require("../middlewares/capitalizationMiddleware");
 
-router.post("/add",allowAdmin,captFirstLetter, async (req, res) => {
+router.post("/add",captFirstLetter, async (req, res) => {
   try {
     const job = new Jobs(req.body);
     const savedJob = await job.save();
@@ -17,7 +17,7 @@ router.post("/add",allowAdmin,captFirstLetter, async (req, res) => {
   }
 });
 
-router.get("/getAll",allowAuth, async (req, res) => {
+router.get("/getAll", async (req, res) => {
   try {
         const filter = { ...req.query };
         const excludeFields = ["limit", "sort", "page"];
@@ -26,7 +26,7 @@ router.get("/getAll",allowAuth, async (req, res) => {
         });
         let filterStr = JSON.stringify(filter);
     
-        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "_id";
+        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "-created_at";
         const page = req.query.page ? parseInt(req.query.page, 10) : 1;
         const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
         const skip = (page - 1) * limit;
@@ -45,8 +45,9 @@ router.get("/getAll",allowAuth, async (req, res) => {
   }
 });
 
-router.patch("/update/:id",allowAdmin,captFirstLetter, async (req, res) => {
+router.patch("/update/:id",captFirstLetter, async (req, res) => {
   try {
+    req.body = { ...req.body, updated_at: Date.now() };
     const job = await Jobs.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!job) {
       res.status(400).json({ status: false, message: "Couldn't update job" });
@@ -57,7 +58,7 @@ router.patch("/update/:id",allowAdmin,captFirstLetter, async (req, res) => {
   }
 });
 
-router.delete("/delete/:id",allowAdmin, async (req, res) => {
+router.delete("/delete/:id", async (req, res) => {
   try {
     const job = await Jobs.findByIdAndDelete(req.params.id);
     if (!job) {

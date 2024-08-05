@@ -29,7 +29,7 @@ router.get("/getBusinesses", allowAuth, async(req,res)=>{
         });
         let filterStr = JSON.stringify(filter);
     
-        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "_id";
+        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "-created_at";
         const page = req.query.page ? parseInt(req.query.page, 10) : 1;
         const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
         const skip = (page - 1) * limit;
@@ -69,25 +69,32 @@ router.get("/getBusinesses", allowAuth, async(req,res)=>{
 router.patch("/updateBusiness/:id",allowAuth, captFirstLetter,async (req, res) => {
   try {
     const business = await Business.findById(req.params.id);
+    req.body = { ...req.body, updated_at: Date.now() };
     if (!business) {
       res.status(404).json({ status: false, message: "Business not found" });
     }
     if (req.body.images) {
       const baseUrl = req.protocol + '://' + req.get('host');
-      req.body.images[0] = req.body.images[0].replace(baseUrl, '');
+      for (let i = 0; i < req.body.images.length; i++) {
+        if (req.body.images[i].startsWith(baseUrl)) {
+          req.body.images[i] = req.body.images[i].replace(baseUrl, '');
+        }
+      }
     }
     if (req.body.attachments) {
       const baseUrl = req.protocol + '://' + req.get('host');
       req.body.attachments[0] = req.body.attachments[0].replace(baseUrl, '');
     }
     if(req.body.images || req.body.attachments){
-      if(business.images && business.images.length > 0){
-        const oldImagePath = path.join(__dirname, '..', business.images[0]);
-        fs.unlink(oldImagePath, (err) => {
-          if (err && err.code !== 'ENOENT') {
-            console.error('Failed to delete old image:', err.message);
-          }
-        });
+      if (business.images && business.images.length > 0) {
+        for (const image of business.images) {
+          const oldImagePath = path.join(__dirname, '..', image);
+          fs.unlink(oldImagePath, (err) => {
+            if (err && err.code !== 'ENOENT') {
+              console.error('Failed to delete old image:', err.message);
+            }
+          });
+        }
       }
       if(business.attachments && business.attachments.length > 0){
         const oldAttachmentPath = path.join(__dirname, '..', business.attachments[0]);
@@ -121,12 +128,14 @@ router.delete("/deleteBusiness/:id",allowAuth, async (req, res) => {
     }
     try{
       if(business.images && business.images.length > 0){
-        const oldImagePath = path.join(__dirname, '..', business.images[0]);
-        fs.unlink(oldImagePath, (err) => {
-          if (err && err.code !== 'ENOENT') {
-            console.error('Failed to delete image:', err.message);
-          }
-        });
+        for (const image of business.images) {
+          const imagePath = path.join(__dirname, '..', image);
+          fs.unlink(imagePath, (err) => {
+            if (err && err.code !== 'ENOENT') {
+              console.error('Failed to delete image:', err.message);
+            }
+          });
+        }
       }
       if(business.attachments && business.attachments.length > 0){
         const oldAttachmentPath = path.join(__dirname, '..', business.attachments[0]);

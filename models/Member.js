@@ -116,7 +116,15 @@ const memberSchema = new mongoose.Schema({
                 }
             }
         
-    }]
+    }],
+    created_at: {
+        type: Date,
+        default: Date.now
+    },
+    updated_at: {
+        type: Date,
+      default: Date.now
+    },
 },
 {
     toJSON: {
@@ -126,6 +134,9 @@ const memberSchema = new mongoose.Schema({
             delete ret.__v;
         }
     }
+},
+{
+    timestamps: true,
 }
 
 );
