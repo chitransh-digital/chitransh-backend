@@ -29,7 +29,7 @@ router.get("/getBusinesses", allowAuth, async(req,res)=>{
         });
         let filterStr = JSON.stringify(filter);
     
-        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "_id";
+        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "-created_at";
         const page = req.query.page ? parseInt(req.query.page, 10) : 1;
         const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
         const skip = (page - 1) * limit;
@@ -69,6 +69,7 @@ router.get("/getBusinesses", allowAuth, async(req,res)=>{
 router.patch("/updateBusiness/:id",allowAuth, captFirstLetter,async (req, res) => {
   try {
     const business = await Business.findById(req.params.id);
+    req.body = { ...req.body, updated_at: Date.now() };
     if (!business) {
       res.status(404).json({ status: false, message: "Business not found" });
     }

@@ -29,6 +29,14 @@ const jobSchema = new mongoose.Schema(
     requirements: {
       type: [String],
     },
+    created_at: {
+      type: Date,
+      default: Date.now
+    },
+    updated_at: {
+        type: Date,
+        default: Date.now
+    },
   },
   {
     toJSON: {
@@ -38,6 +46,9 @@ const jobSchema = new mongoose.Schema(
         delete ret.__v;
       },
     },
+  },
+  {
+    timestamps: true,
   }
 );
 

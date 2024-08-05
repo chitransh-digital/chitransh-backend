@@ -46,7 +46,7 @@ router.get("/getKaryakarnis", allowAuth, async (req, res) => {
 
       let filterStr = JSON.stringify(filter);
 
-      const sortBy = sort ? sort.split(",").join(" ") : "_id";
+      const sortBy = sort ? sort.split(",").join(" ") : "-created_at";
       const pageNum = page ? parseInt(page, 10) : 1;
       const limitNum = limit ? parseInt(limit, 10) : 10;
       const skip = (pageNum - 1) * limitNum;
@@ -121,6 +121,7 @@ router.get("/getAllKaryakarnis", async (req, res) => {
 router.patch("/update/:id",  allowAdmin, captFirstLetter,async (req, res) => {
   try {
     const karyakarni = await Karyakarni.findById(req.params.id);
+    req.body = { ...req.body, updated_at: Date.now() };
     if (!karyakarni) {
       res.status(404).json({ status: false, message: "Karyakarni not found" });
     }
@@ -162,6 +163,7 @@ router.patch("/update/:id",  allowAdmin, captFirstLetter,async (req, res) => {
 router.patch("/update/:id/:memberId", allowAdmin,  captFirstLetter,async (req, res) => {
   try {
     const karyakarni = await Karyakarni.findById(req.params.id);
+    req.body = { ...req.body, updated_at: Date.now() };
     if (!karyakarni) {
       res.status(404).json({ status: false, message: "Karyakarni not found" });
     }

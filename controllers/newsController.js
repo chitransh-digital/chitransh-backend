@@ -28,7 +28,7 @@ router.get("/getFeeds",allowAuth,async(req,res)=>{
         });
         let filterStr = JSON.stringify(filter);
     
-        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "_id";
+        const sortBy = req.query.sort ? req.query.sort.split(",").join(" ") : "-created_at";
         const page = req.query.page ? parseInt(req.query.page, 10) : 1;
         const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
         const skip = (page - 1) * limit;
@@ -65,6 +65,7 @@ router.get("/getFeeds",allowAuth,async(req,res)=>{
 router.patch("/update/:id",allowAdmin,  captFirstLetter,async (req, res) => {
   try {
     const feed = await Feeds.findById(req.params.id);
+    req.body = { ...req.body, updated_at: Date.now() };
     if (!feed) {
       res.status(404).json({ status: false, message: "Feed not found" });
     }

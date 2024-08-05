@@ -56,7 +56,7 @@ router.get("/viewFamilies", allowAuth, async (req, res) => {
 
       let filterStr = JSON.stringify(filter);
       
-      const sortBy = sort ? sort.split(",").join(" ") : "_id";
+      const sortBy = sort ? sort.split(",").join(" ") : "-created_at";
       const pageNum = page ? parseInt(page, 10) : 1;
       const limitNum = limit ? parseInt(limit, 10) : 10;
       const skip = (pageNum - 1) * limitNum;
@@ -111,7 +111,7 @@ router.get("/viewFamilies", allowAuth, async (req, res) => {
 router.patch("/update/:id/:memberId",allowAuth,  captFirstLetter,async (req, res) => {
   try {
     const { memberData } = req.body;
-
+    req.body = { ...req.body, updated_at: Date.now() };
     const family = await Member.findById(req.params.id);
     if (!family) {
       res.status(404).json({ status: false, message: "Family not found" });

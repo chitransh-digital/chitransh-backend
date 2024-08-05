@@ -34,6 +34,14 @@ const karyakarniSchema = new mongoose.Schema({
         enum: ["India", "State", "City"], 
         required: true 
     },
+    created_at: {
+        type: Date,
+        default: Date.now
+      },
+      updated_at: {
+          type: Date,
+          default: Date.now
+      },
     members: [{
         name: {
             type: String,
@@ -70,6 +78,9 @@ const karyakarniSchema = new mongoose.Schema({
             delete ret.__v;
         }
     }
+},
+{
+    timestamps: true
 }
 );
 

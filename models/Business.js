@@ -52,6 +52,14 @@ const businessSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    created_at: {
+      type: Date,
+      default: Date.now
+    },
+    updated_at: {
+        type: Date,
+        default: Date.now
+    },
   },
   {
     toJSON: {
@@ -61,7 +69,10 @@ const businessSchema = new mongoose.Schema(
         delete ret.__v;
       },
     },
-  }
+  },
+  {
+    timestamps: true,
+  },
 );
 
 const Business = mongoose.model("Business", businessSchema);

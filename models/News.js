@@ -31,6 +31,14 @@ const newsFeedSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    created_at: {
+      type: Date,
+      default: Date.now
+    },
+    updated_at: {
+        type: Date,
+        default: Date.now
+    },
   },
   {
     toJSON: {
@@ -40,6 +48,9 @@ const newsFeedSchema = new mongoose.Schema(
         delete ret.__v;
       },
     },
+  },
+  {
+    timestamps: true,
   }
 );
 
