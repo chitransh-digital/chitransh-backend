@@ -87,4 +87,20 @@ router.post("/signinAdmin", async (req, res) => {
   }
 });
 
+router.put("/resetPassword", async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    const adminConfig = await AdminConfig.findOne();
+    bcrypt.hash(newPassword, 10, async function (err, hash) {
+      adminConfig.password = hash;
+      await adminConfig.save();
+      res
+        .status(200)
+        .json({ status: true, message: "Password changed successfully" });
+    });
+  } catch (err) {
+    res.status(400).json({ status: false, message: err.message });
+  }
+});
+
 module.exports = router;
